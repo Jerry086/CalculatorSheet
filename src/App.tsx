@@ -8,11 +8,15 @@ import SpreadSheet from './Components/SpreadSheet';
 import SpreadSheetClient from './Engine/SpreadSheetClient';
 import LoginPageComponent from './Components/LoginPageComponent';
 
+function displayErrorMessage(message: string) {
+  alert(message);
+}
+
 function App() {
 
 
   const [documentName, setDocumentName] = useState(getDocumentNameFromWindow());
-  const spreadSheetClient = new SpreadSheetClient('documents', '');
+  const spreadSheetClient = new SpreadSheetClient('documents', '', displayErrorMessage);
   //const memoryUsage = process.memoryUsage();
   useEffect(() => {
     if (window.location.href) {
