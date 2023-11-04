@@ -60,20 +60,21 @@ The high-level design of the chat system involves the following components:
 
 - Implements chat window in the spreadsheet editor page
 - Provides an entry pane for participants to enter text
+- Provides a button for participants to send messages
 - Displays the latest 20 chat items
 - Allows users to request more chat items via pagination scrolling
 
 ### 4.2. Component B: Server
 
-- Receives and stores incoming chat messages
-- Maintains an ordered list of chat items
+- Receives and stores incoming chat messages for each document, handled by a chat server
+- Maintains an ordered list of chat items and the corresponding users
 - Provides a paged fetch method for retrieving chat items
 
 ### 4.3. Component C: Engine
 
-- Manages communication between the client and server.
-- Implements error handling and recovery mechanisms.
-- Supports real-time updates and notifications.
+- Implements chat client that manages communication between the client and server.
+- Implements callback functions for sending 'PUT' requests to the server upon button click.
+- Supports real-time updates and notifications through timely fetches.
 
 ## 5. User Stories
 
