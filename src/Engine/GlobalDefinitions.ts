@@ -44,3 +44,17 @@ export interface DocumentTransport {
   contributingUsers: UserEditing[];
   errorMessage: string;
 }
+
+// message container
+
+export interface MessageContainer {
+  user: string;
+  message: string;
+  timestamp: Date;
+  id: number;
+}
+
+export interface MessagesContainer {
+  messages: MessageContainer[];
+  paginationToken: string;
+}
