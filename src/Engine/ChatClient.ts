@@ -6,14 +6,22 @@
  */
 
 import { MessagesContainer, MessageContainer } from "./GlobalDefinitions";
+import {
+  PortsGlobal,
+  LOCAL_SERVER_URL,
+  RENDER_SERVER_URL,
+} from "../ServerDataDefinitions";
 
 class ChatClient {
+  private _serverPort: number = PortsGlobal.serverPort;
+  private _baseURL: string = `${LOCAL_SERVER_URL}:${this._serverPort}`;
   earliestMessageID: number = 10000000000;
   previousMessagesFetched: boolean = false;
 
   messages: MessageContainer[] = [];
 
   updateDisplay: () => void = () => {};
+
   /**
    * Creates an instance of ChatClient.
    * @memberof ChatClient
@@ -28,6 +36,10 @@ class ChatClient {
     this.updateDisplay = callback;
   }
 
+  /**
+   * insert a message into the array of messages
+   * @param message a message to insert into the array of messages
+   */
   insertMessage(message: MessageContainer) {
     const messageID = message.id;
 
@@ -60,6 +72,10 @@ class ChatClient {
     // console.log(`Message is not inserted ${messageID}`)
   }
 
+  /**
+   * insert an array of messages into the message cache
+   * @param messages an array of messages to insert into the message cache
+   */
   insertMessages(messages: MessageContainer[]) {
     for (let i = 0; i < messages.length; i++) {
       const message = messages[i];
@@ -69,11 +85,11 @@ class ChatClient {
   }
 
   /**
-   * get the last 10 messages from the server if the paging token is empty
-   * get the next 10 messages from the server if the paging token is not empty
+   * get the latest 20 messages from the server if the paging token is empty
+   * get the older 20 messages from the server if the paging token is not empty
    */
   getMessages(pagingToken: string = "") {
-    const url = `http://localhost:5800/messages/get/`;
+    const url = `${this._baseURL}/messages/get/`;
     //const url = `https://pagination-demo.onrender.com/messages/get`
 
     const fetchURL = `${url}${pagingToken}`;
@@ -98,6 +114,11 @@ class ChatClient {
     }, 1000);
   }
 
+  /**
+   * Advanced topic: get the next 20 messages
+   * this method is called when the user scrolls to the top of the chat window
+   * or click the "Load Previous Messages" button
+   */
   getNextMessages() {
     console.log("getNextMessages()");
     console.log(`this.earliestMessageID: ${this.earliestMessageID - 1}`);
@@ -108,9 +129,14 @@ class ChatClient {
     this.getMessages(pagingToken);
   }
 
+  /**
+   * send a message to the server
+   * @param message a message to send to the server
+   * @param user the user who sent the message
+   */
   sendMessage(message: string, user: string) {
     console.log("sentMessage()");
-    const url = `http://localhost:5800/message/${user}/${message}`;
+    const url = `${this._baseURL}/message/${user}/${message}`;
     //const url = `https://pagination-demo.onrender.com/message/${user}/${message}`
 
     fetch(url)
