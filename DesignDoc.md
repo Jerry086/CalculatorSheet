@@ -14,8 +14,8 @@
 | Version | Date       | Author  | Description   |
 | ------- | ---------- | ------- | ------------- |
 | 1.0     | 2023-11-03 | Zhongyu | Initial Draft |
-|         |            |         |               |
-|         |            |         |               |
+| 1.1     | 2023-11-16 | Jieyu   | Testing cases |
+| 1.2     | 2023-11-16 | Saif    | User stories  |
 
 ## Table of Contents
 
@@ -56,7 +56,7 @@ The high-level design of the chat system involves the following components:
 
 ## 4. Low-Level Design
 
-### 4.1. Component A: Client
+### 4.1. Component A: Client - Saif
 
 - Implements chat window in the spreadsheet editor page
 - Provides an entry pane for participants to enter text
@@ -64,13 +64,13 @@ The high-level design of the chat system involves the following components:
 - Displays the latest 20 chat items
 - Allows users to request more chat items via pagination scrolling
 
-### 4.2. Component B: Server
+### 4.2. Component B: Server - Jieyu
 
 - Receives and stores incoming chat messages for each document, handled by a chat server
 - Maintains an ordered list of chat items and the corresponding users
 - Provides a paged fetch method for retrieving chat items
 
-### 4.3. Component C: Engine
+### 4.3. Component C: Engine - Zhongyu
 
 - Implements chat client that manages communication between the client and server.
 - Implements callback functions for sending 'PUT' requests to the server upon button click.
@@ -78,32 +78,11 @@ The high-level design of the chat system involves the following components:
 
 ## 5. User Stories
 
-### 5.1. User Story 1
-
-- ... (TBD)
-- ... (TBD)
-
-### 5.2. User Story 2
-
-- ... (TBD)
-- ... (TBD)
-
-### 5.3. User Story 3 (Advanced)
-
-- ... (TBD)
-- ... (TBD)
+https://docs.google.com/spreadsheets/d/1PzEV7MQY2duQ-JxkgpjVED2Nbloiqluc-pqrj6nEGoA/edit#gid=0
 
 ## 6. Testing Documentation
 
-### 6.1. Test Plan
-
-- ... (TBD)
-- ... (TBD)
-
-### 6.2. Test Cases
-
-- ... (TBD)
-- ... (TBD)
+https://docs.google.com/document/d/1WXT8BYHsOTzZ7qPZuUFLhTrPYDW4apj1KcI9G-Jpn7w/edit#heading=h.um8gxeuedo83
 
 ## Conclusion
 
