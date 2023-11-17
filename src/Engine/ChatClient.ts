@@ -97,6 +97,9 @@ class ChatClient {
       .then((response) => response.json())
       .then((messagesContainer: MessagesContainer) => {
         let messages = messagesContainer.messages;
+        if (messages.length === 0) {
+          return;
+        }
         this.insertMessages(messages);
       })
       .catch((error) => {

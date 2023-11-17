@@ -189,37 +189,37 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
  * This array of sample messages is used to test the 'chatComponent' component.
  * It contains a mix of 20 random messages from 4 different users: Sam, Tam, Kim, and Lee.
  */
-const sampleMessages = [
-  { text: 'Sure, I’ll bring snacks.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
-  { text: 'Hello, how are you?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
-  { text: 'I think I left my charger at your place.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
-  { text: 'Can we reschedule our meeting?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
-  { text: 'Thats a great idea!', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
-  { text: 'I’m good, just got back from shopping.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
-  { text: 'Did anyone finish the assignment?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
-  { text: 'Yes, I’ll send it in a bit.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
-  { text: 'Anyone wants to grab lunch?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
-  { text: 'Sure, I’ll bring snacks.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
-  { text: 'Hello, how are you?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
-  { text: 'I think I left my charger at your place.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
-  { text: 'Can we reschedule our meeting?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
-  { text: 'Thats a great idea!', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
-  { text: 'I’m good, just got back from shopping.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
-  { text: 'Did anyone finish the assignment?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
-  { text: 'Yes, I’ll send it in a bit.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
-  { text: 'Anyone wants to grab lunch?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
-  { text: 'I can’t make it today.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
-  { text: 'Let’s meet tomorrow then.', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
-  { text: 'I found a new café nearby.', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
-  { text: 'I’m in for lunch!', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
-  { text: 'Does it have vegan options?', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
-  { text: 'Yes, they have a great selection.', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' }, // second user named sam
-  { text: 'Alright, see you all tomorrow.', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
-  { text: 'Can someone help me with the code?', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
-  { text: 'Sure, what do you need?', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
-  { text: 'Don’t forget the meeting at 5 PM.', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
-  { text: 'Got it, I’ll be there.', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' } // second user named sam
-];
+// const sampleMessages = [
+//   { text: 'Sure, I’ll bring snacks.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
+//   { text: 'Hello, how are you?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
+//   { text: 'I think I left my charger at your place.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
+//   { text: 'Can we reschedule our meeting?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
+//   { text: 'Thats a great idea!', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
+//   { text: 'I’m good, just got back from shopping.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
+//   { text: 'Did anyone finish the assignment?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
+//   { text: 'Yes, I’ll send it in a bit.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
+//   { text: 'Anyone wants to grab lunch?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
+//   { text: 'Sure, I’ll bring snacks.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
+//   { text: 'Hello, how are you?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
+//   { text: 'I think I left my charger at your place.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
+//   { text: 'Can we reschedule our meeting?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
+//   { text: 'Thats a great idea!', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
+//   { text: 'I’m good, just got back from shopping.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
+//   { text: 'Did anyone finish the assignment?', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
+//   { text: 'Yes, I’ll send it in a bit.', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
+//   { text: 'Anyone wants to grab lunch?', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
+//   { text: 'I can’t make it today.', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
+//   { text: 'Let’s meet tomorrow then.', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
+//   { text: 'I found a new café nearby.', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' },
+//   { text: 'I’m in for lunch!', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
+//   { text: 'Does it have vegan options?', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
+//   { text: 'Yes, they have a great selection.', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' }, // second user named sam
+//   { text: 'Alright, see you all tomorrow.', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
+//   { text: 'Can someone help me with the code?', timestamp: "dec 09 10:09:09 pm",  username: 'Tam' },
+//   { text: 'Sure, what do you need?', timestamp: "dec 09 10:09:09 pm",  username: 'Lee' },
+//   { text: 'Don’t forget the meeting at 5 PM.', timestamp: "dec 09 10:09:09 pm",  username: 'Kim' },
+//   { text: 'Got it, I’ll be there.', timestamp: "dec 09 10:09:09 pm",  username: 'Sam' } // second user named sam
+// ];
 
 
   return (
@@ -238,7 +238,7 @@ const sampleMessages = [
         currentlyEditing={currentlyEditing}></KeyPad>
       <ServerSelector serverSelector={serverSelector} serverSelected={serverSelected} />
     </div>
-              {userName && <ChatComponent messages={sampleMessages} userName={userName}/>}
+              {userName && <ChatComponent userName={userName}/>}
               </div>
 
   )
