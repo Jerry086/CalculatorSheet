@@ -1,12 +1,18 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
-import { MessagesContainer, MessageContainer, serverPort } from "./Globals";
+import {
+  MessagesContainer,
+  MessageContainer,
+} from "../Engine/GlobalDefinitions";
+
+import { PortsGlobal } from "../ServerDataDefinitions";
 import { get } from "http";
 import { start } from "repl";
 import { send } from "process";
 
 // get the command line arguments
+let serverPort = PortsGlobal.serverPort;
 
 let baseURL = `http://localhost:${serverPort}`;
 
