@@ -1,0 +1,161 @@
+.chat-container {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 350px;
+  border: 4px solid white;
+  border-radius: 5px;
+  background-color: rgb(113, 113, 137);
+  z-index: 1000; /* Adjust as necessary */
+}
+
+.chat-message-list {
+  max-height: 30vh; /* Relative to viewport height */
+  overflow-y: auto;
+  list-style: none;
+  padding: 10px;
+
+  /* For Firefox: customizing scrollbar */
+  scrollbar-width: auto; /* 'thin' or 'auto' */
+  scrollbar-color: rgba(169, 169, 173, 0.7)  ; /* thumb and track color */
+}
+
+::-webkit-scrollbar {
+  width: 20px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 10px;
+  background-color: rgba(188, 188, 199, 0.7);
+
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background-color: rgba(162, 162, 167, 0.7);
+  border-radius: 10px;
+  border: snow 3px solid;
+
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background:  grey; 
+    background-color:grey;
+}
+
+
+
+
+.chat-message {
+  padding: 0.5rem 0.875rem;
+  font-size: large;
+  margin: 0 auto 1rem;
+  max-width: 70%;
+  word-wrap: break-word;
+  border: 1px solid #e5e5ea;
+  border-radius: 1.15rem;
+}
+
+.user-message {
+  background-color: #007bff; /* Blue */
+  color: white;
+  margin-left: auto; /* Aligns to the right */
+  margin-right: 0; /* Reset the left margin */
+}
+
+.userTitleSelf {
+  text-align: left; /* Aligns text to the left */
+  display: block; /* Ensures the element is block-level */
+}
+
+.userTitleOther {
+  text-align: right; /* Aligns text to the left */
+  display: block; /* Ensures the element is block-level */
+}
+
+.input-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+}
+
+.chat-textarea {
+  flex-grow: 1; /* Takes up remaining space */
+  max-height: calc(1.5em * 10); /* Sets max height for about 10 rows */
+  border: 4px double black;
+  resize: vertical; /* Allows only vertical resizing */
+}
+
+.button-row {
+  max-height: 10%; /* Limit to the top 10% of the chat container */
+  width: 100%; /* Take full width */
+  display: flex;
+  justify-content: center; /* Center the button text horizontally */
+  align-items: center; /* Center the button text vertically */
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0); /* Background color for the button area */
+  border-radius: 5px 5px 0 0; /* Round the top corners */
+}
+
+.button-text {
+  font-size: 2.5em;
+  color: white;
+  user-select: none; /* Prevent text selection */
+  margin: 0; /* Removes extra space around +/- */
+  padding: 4px 8px; /* Minimal padding around +/- for better touch area */
+}
+
+.shown-button {
+  width: auto; /* Auto width to fit '-' */
+  padding-left: 10px; /* Some padding from the left edge */
+  justify-content: end; /* Align '-' to the left */
+  background-color: transparent;
+  position: relative;
+  top: 10px;
+  right: 10px;
+  line-height: 0;
+}
+
+.hidden-button:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.send-button {
+  margin-left: 5px; /* Space between textarea and button */
+  margin-right: 5px;
+  min-height: 100%;
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  padding: 0.5rem 0.875rem;
+  font-size: large;
+  max-width: 70%;
+  word-wrap: break-word;
+  border: 1px solid #e5e5ea;
+  border-radius: 1.15rem;
+  user-select: none;
+  cursor: pointer;
+}
+
+.send-button:hover {
+  background-color: #436b95d6;
+  color: white;
+}
+
+.other-message {
+  background-color: #34c759; /* Green */
+  color: white;
+  margin-right: auto; /* Aligns to the left */
+  margin-left: 0; /* Reset the left margin */
+}
+
+.chat-textarea {
+  width: 300px;
+  max-width: 95%;
+  min-height: 50px;
+  overflow-x: wrap;
+  border: 4px double black;
+}
