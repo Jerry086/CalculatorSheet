@@ -288,3 +288,8 @@ Title: As a user, I want the 'Return to Login Page' button to match the page's d
 Button was changed to match page theme via a new class and css in the appropriate file.
 Button was moved to bottom of page so that it was not in the header/title - which seemed incongruous.
 Upon manual testing button works as expected and fits page theme.
+
+
+# Bug 6 Long user name overflow the cell
+The bug is fixed by limiting user name's length to 1 - 12 characters and only consists of alphanumeric characters.
+## Fix status: Fixed
