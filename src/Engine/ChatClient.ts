@@ -97,6 +97,9 @@ class ChatClient {
       .then((response) => response.json())
       .then((messagesContainer: MessagesContainer) => {
         let messages = messagesContainer.messages;
+        if (messages.length === 0) {
+          return;
+        }
         this.insertMessages(messages);
       })
       .catch((error) => {
@@ -130,6 +133,38 @@ class ChatClient {
   }
 
   /**
+   * send a message to the server via POST
+   * @param message a message to send to the server
+   * @param user the user who sent the message
+   */
+  sendMessagePost(message: string, user: string) {
+    console.log("sendMessage()");
+
+    const url = `${this._baseURL}/message`;
+
+    const data = {
+        user: user,
+        message: message
+    };
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((messagesContainer: MessagesContainer) => {
+        let messages = messagesContainer.messages;
+        this.insertMessages(messages);
+    })
+    .catch((error) => {
+        console.error(error);
+    });
+  }
+
+  /**
    * send a message to the server
    * @param message a message to send to the server
    * @param user the user who sent the message
@@ -150,5 +185,6 @@ class ChatClient {
       });
   }
 }
+
 
 export default ChatClient;
