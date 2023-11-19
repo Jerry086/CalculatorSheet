@@ -77,6 +77,13 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const originalValue = e.target.value;
+
+      // Check if the input is empty and not just a sequence of whitespaces
+    if (originalValue.trim() === "") {
+      alert("Input cannot be empty.");
+      return;
+    }
+    
     const regex = /[^a-z0-9.,!?\\/\-_()\s=+*&^%$#@!~:;<>'"{[\]}]/gi; // Matches characters NOT in the set
     const newValue = originalValue.replace(regex, '');
 
