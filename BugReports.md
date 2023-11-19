@@ -54,6 +54,13 @@ Title: As a user, I want a login button on the login page, so that I can clearly
 
 
 
+## Fix status: Fixed
+### Details
+
+Login functionality was moved into a new method that is called on pressing enter. A login button was added that also calls this method. Button is changed to change username via conditional rendering when appropriate per bug 2.
+ Functionality was tested manually.
+
+
 # Bug 2 Missing Submit Button for Username Change on Login Screen
 ## Ticket
 
@@ -106,6 +113,15 @@ Title: As a user, I want a submit button for changing my username, so I can be s
 
 3. **Fallback to Keyboard Interaction:**
    - The option to press 'Enter' to submit the new username should still be functional as a secondary method.
+
+
+
+
+## Fix status: Fixed
+### Details
+
+Login/change username functionality was moved into a new method that is called on pressing enter. A login button was added that also calls this method. Button is changed to change username via conditional rendering when appropriate per bug 1.
+Functionality was tested manually.
 
 
 # Bug 3. User Story: Visibility of Logout Button When Logged Out
@@ -167,6 +183,14 @@ Title: As a user, I want the logout button to be hidden when I'm logged out, so 
 
 
 
+
+
+## Fix status: Fixed
+### Details
+
+Conditional rendering was used to hide this button when userName is defined. Functionality was tested manually.
+
+
 # Bug 4. Failed merge resulted in duplicated lines in ChatComponent.tsx
 
 ## Ticket
@@ -204,7 +228,10 @@ The build fails due to duplicated lines and possible syntax errors in `ChatCompo
 ## User Story
 Not relevant as this is a dev side bug
 
+## Fix status: Fixed
+### Details
 
+Code was re-reviewed and duplicated lines were removed. On manual testing the page renders and functions as expected.
 
 
 # Bug 5 Return to Login page button does not match page theme
@@ -255,4 +282,9 @@ Title: As a user, I want the 'Return to Login Page' button to match the page's d
    - The 'Return to Login Page' button should be styled to match the dark theme of the page.
    - The styling should include appropriate colors, font, and other UI elements that align with the dark design.
 
+## Fix status: Fixed
+### Details
 
+Button was changed to match page theme via a new class and css in the appropriate file.
+Button was moved to bottom of page so that it was not in the header/title - which seemed incongruous.
+Upon manual testing button works as expected and fits page theme.
