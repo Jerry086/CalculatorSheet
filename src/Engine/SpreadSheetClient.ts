@@ -429,7 +429,9 @@ class SpreadSheetClient {
     const isEditing = document.isEditing;
     const contributingUsers = document.contributingUsers;
     const errorMessage = document.errorMessage;
+    if(errorMessage){
     console.log(`errorMessage = ${errorMessage}`);
+    }
 
     // create the document
     this._document = {
