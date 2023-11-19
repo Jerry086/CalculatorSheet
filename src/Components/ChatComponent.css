@@ -7,6 +7,7 @@
   border-radius: 5px;
   background-color: rgb(113, 113, 137);
   z-index: 1000; /* Adjust as necessary */
+  
 }
 
 .chat-message-list {
@@ -14,6 +15,7 @@
   overflow-y: auto;
   list-style: none;
   padding: 10px;
+  min-height: 20vh;
 
   /* For Firefox: customizing scrollbar */
   scrollbar-width: auto; /* 'thin' or 'auto' */
@@ -57,7 +59,10 @@
   word-wrap: break-word;
   border: 1px solid #e5e5ea;
   border-radius: 1.15rem;
+  white-space: pre-wrap;
+
 }
+
 
 .user-message {
   background-color: #007bff; /* Blue */
@@ -88,6 +93,11 @@
   max-height: calc(1.5em * 10); /* Sets max height for about 10 rows */
   border: 4px double black;
   resize: vertical; /* Allows only vertical resizing */
+  width: 300px;
+  max-width: 95%;
+  min-height: 50px;
+  overflow-x: wrap;
+  border: 4px double black;
 }
 
 .button-row {
@@ -152,10 +162,3 @@
   margin-left: 0; /* Reset the left margin */
 }
 
-.chat-textarea {
-  width: 300px;
-  max-width: 95%;
-  min-height: 50px;
-  overflow-x: wrap;
-  border: 4px double black;
-}
