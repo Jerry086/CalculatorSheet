@@ -87,6 +87,7 @@ class Database {
   addMessage(user: string, message: string) {
     // prepend the message to the array
     this.messages.unshift(new Message(message, user, this.messageCount++));
+    console.log("added message,", message);
   }
 
   // get all messages  this is for testing only, do not use in production
