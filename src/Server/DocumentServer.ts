@@ -285,6 +285,7 @@ app.put(
 // reset the database
 app.get("/reset", (req, res) => {
   console.log("get /reset");
+  console.log("Resetting the database per user request");
   database.reset();
   return res.json({ message: "reset" });
 });
@@ -295,6 +296,16 @@ app.get("/message/:user/:message", (req, res) => {
   const message = req.params.message;
   const user = req.params.user;
   console.log(`get /message/${message}/${user}`);
+  database.addMessage(user, message);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
+// POST /message
+// this adds a message to the database
+app.post("/message", (req, res) => {
+  const { message, user } = req.body;
+  console.log(`post /message with message: ${message} and user: ${user}`);
   database.addMessage(user, message);
   const result = database.getMessages("");
   return res.json(result);
