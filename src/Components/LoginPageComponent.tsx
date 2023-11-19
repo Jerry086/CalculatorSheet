@@ -36,23 +36,36 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
   function getUserLogin() {
     return <div>
       <input
+        id="userNameInput"
         type="text"
         placeholder="User name"
         defaultValue={userName}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
             // get the text from the input
-            let userName = (event.target as HTMLInputElement).value;
-            window.sessionStorage.setItem('userName', userName);
-            // set the user name
-            setUserName(userName);
-            spreadSheetClient.userName = userName;
+            // let userName = (event.target as HTMLInputElement).value;
+            // window.sessionStorage.setItem('userName', userName);
+            // // set the user name
+            // setUserName(userName);
+            // spreadSheetClient.userName = userName;
+            handleLogin();
+
           }
         }} />
     </div>
 
   }
 
+  function handleLogin() {
+    const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
+    if (checkUserNameInput()) {
+      const userName = userNameInput.value;
+      window.sessionStorage.setItem('userName', userName);
+      setUserName(userName);
+      spreadSheetClient.userName = userName;
+    }
+  }
+  
   function checkUserName(): boolean {
     if (userName === "") {
       alert("Please enter a user name");
@@ -60,6 +73,19 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
     }
     return true;
   }
+
+  function checkUserNameInput(): boolean {
+    const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
+    const userName = userNameInput.value;
+
+    if (userName === "") {
+      alert("Please enter a user name");
+      return false;
+    }
+    return true;
+  }
+
+
   function loadDocument(documentName: string) {
     // set the document name
     spreadSheetClient.documentName = documentName;
@@ -122,8 +148,10 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
   function getLoginPanel() {
     return <div>
       <h5 >Login Page</h5>
+      <span>Username</span>
       {getUserLogin()}
-      <button onClick={() => logout()}>Logout</button>
+      <button onClick={handleLogin}>{userName ? 'Change Username': 'Login'}</button>
+      {userName && <button onClick={() => logout()}>Logout</button>}
     </div>
   }
 
