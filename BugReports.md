@@ -205,3 +205,54 @@ The build fails due to duplicated lines and possible syntax errors in `ChatCompo
 Not relevant as this is a dev side bug
 
 
+
+
+# Bug 5 Return to Login page button does not match page theme
+
+## Ticket: 'Return to Login Page' Button Styling Inconsistent with Dark Theme
+### Description
+
+The 'Return to Login Page' button currently does not match the dark theme of the rest of the page. This inconsistency in styling affects the visual harmony and overall user experience of the application.
+
+### Steps to Reproduce
+
+1. Navigate to the spreadsheet page after loggging in and see where the 'Return to Login Page' button is located.
+2. Observe the styling of the button in contrast with the rest of the page.
+
+### Expected Behavior
+
+The button should be styled to match the dark theme of the page, with appropriate colors, fonts, and UI elements that align with the overall design.
+
+### Actual Behavior
+
+The button's current styling stands out and does not conform to the dark theme, creating a visual inconsistency on the page.
+
+### Possible Solution
+
+- Update the CSS styling of the 'Return to Login Page' button to match the dark mode theme of the page.
+
+### Additional Information
+
+- **Severity**: Medium - affects the visual appeal and user experience.
+- **Priority**: Medium - important for UI consistency and professional appearance.
+
+---
+
+
+
+
+## User Story: Styling the 'Return to Login Page' Button to Match Page Theme
+Title: As a user, I want the 'Return to Login Page' button to match the page's dark theme for a consistent user experience.
+**User Story**
+
+- **As a** user,
+- **I want** the 'Return to Login Page' button to match the dark theme of the page,
+- **So that** I can have a seamless and visually consistent experience across the application.
+
+**Acceptance Criteria:**
+
+1. **Consistent Styling:**
+   - The 'Return to Login Page' button should be styled to match the dark theme of the page.
+   - The styling should include appropriate colors, font, and other UI elements that align with the dark design.
+
+
