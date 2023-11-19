@@ -60,15 +60,25 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
     const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
     if (checkUserNameInput()) {
       const userName = userNameInput.value;
+      if(!checkUserName(userName)) {
+        return;
+      }
       window.sessionStorage.setItem('userName', userName);
       setUserName(userName);
       spreadSheetClient.userName = userName;
     }
   }
   
-  function checkUserName(): boolean {
+  function checkUserName(userName: string): boolean {
+    /*
     if (userName === "") {
       alert("Please enter a user name");
+      return false;
+    }
+    */
+    // user name should only contain letters and numbers and be at most 12 characters long
+    if (!userName.match(/^[a-zA-Z0-9]{1,12}$/)) {
+      alert("User name can only contain letters and numbers and be at most 12 characters long.");
       return false;
     }
     return true;
