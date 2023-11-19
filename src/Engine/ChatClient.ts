@@ -15,6 +15,7 @@ import {
 class ChatClient {
   private _serverPort: number = PortsGlobal.serverPort;
   private _baseURL: string = `${LOCAL_SERVER_URL}:${this._serverPort}`;
+  private _server: string = "";
   earliestMessageID: number = 10000000000;
   previousMessagesFetched: boolean = false;
 
@@ -27,7 +28,15 @@ class ChatClient {
    * @memberof ChatClient
    */
   constructor() {
-    console.log("ChatClient");
+    const isProduction = process.env.NODE_ENV === "production";
+    if (isProduction) {
+      this.setServerSelector("renderhost");
+      console.log(" Running production client");
+    } else {
+      this.setServerSelector("localhost"); // change this to renderhost if you want to default to renderhost
+      console.log(" Running development client");
+    }
+
     this.getMessages();
     this.getMessagesContinuously();
   }
@@ -151,6 +160,21 @@ class ChatClient {
       .catch((error) => {
         console.error(error);
       });
+  }
+
+  /**
+   * Server selector for the fetch
+   */
+  setServerSelector(server: string): void {
+    if (server === this._server) {
+      return;
+    }
+    if (server === "localhost") {
+      this._baseURL = `${LOCAL_SERVER_URL}:${this._serverPort}`;
+    } else {
+      this._baseURL = RENDER_SERVER_URL;
+    }
+    this._server = server;
   }
 }
 
