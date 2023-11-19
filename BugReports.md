@@ -1,6 +1,6 @@
 
 
-# Bug 1
+# Bug 1 Missing Submit Button for login on Login Screen
 ## Ticket
 ### Description
 
@@ -54,7 +54,7 @@ Title: As a user, I want a login button on the login page, so that I can clearly
 
 
 
-# Bug 2
+# Bug 2 Missing Submit Button for Username Change on Login Screen
 ## Ticket
 
 Title: Missing Submit Button for Username Change on Login Screen
@@ -167,7 +167,41 @@ Title: As a user, I want the logout button to be hidden when I'm logged out, so 
 
 
 
+# Bug 4. Failed merge resulted in duplicated lines in ChatComponent.tsx
 
+## Ticket
+### Description
 
+A recent merge has resulted in duplicated lines in `ChatComponent.tsx`, causing build failures when running `npm run start`. This issue needs to be addressed to restore the build functionality.
+
+### Steps to Reproduce
+
+1. Perform a `git pull` or update the local repository to the latest commit.
+2. Run `npm run start`
+3. Observe the build failure due to syntax errors or duplicated lines in `ChatComponent.tsx`.
+
+### Expected Behavior
+
+The application should build successfully without any errors related to merge conflicts in `ChatComponent.tsx`.
+
+### Actual Behavior
+
+The build fails due to duplicated lines and possible syntax errors in `ChatComponent.tsx`, which seem to be a result of a failed merge operation.
+
+### Possible Solution
+
+- Review the `ChatComponent.tsx` file to identify all erroneous duplications and conflicts.
+- Resolve these issues by removing duplicated lines and ensuring the correct code is in place.
+- Test the build process after resolving the issues to confirm that the application builds and runs successfully.
+
+### Additional Information
+
+- **Severity**: High - prevents the application from building and running.
+- **Priority**: High - needs to be resolved to continue development and deployment.
+
+---
+
+## User Story
+Not relevant as this is a dev side bug
 
 
