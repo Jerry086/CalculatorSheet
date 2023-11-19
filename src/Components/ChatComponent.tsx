@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import "./ChatComponent.css"; // Import the CSS file
 import { MessageContainer } from "../Engine/GlobalDefinitions";
 import ChatClient from "../Engine/ChatClient";
+import { MessageContainer } from "../Engine/GlobalDefinitions";
+import ChatClient from "../Engine/ChatClient";
 
+// interface Message {
+//   // TODO oldest message should be a termination message - no more messages
+//   text: string;
+//   username: string;
+//   timestamp: string;
+// }
 // interface Message {
 //   // TODO oldest message should be a termination message - no more messages
 //   text: string;
@@ -17,9 +26,14 @@ interface ChatComponentProps {
 const chatClient = new ChatClient();
 
 const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
+const chatClient = new ChatClient();
+
+const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [loadingPrevMessages, setLoadingPrevMessages] = useState(false);
+  const [messageList, setMessageList] = useState<MessageContainer[]>([]);
+  const [mostRecentId, setMostRecentId] = useState<number>(-1);
   const [messageList, setMessageList] = useState<MessageContainer[]>([]);
   const [mostRecentId, setMostRecentId] = useState<number>(-1);
   const messageListRef = useRef<HTMLUListElement>(null);
@@ -54,8 +68,12 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
 
   // START at bottom of messages
   // scroll to bottom when new message is added
+  // scroll to bottom when new message is added
   useEffect(() => {
     scrollToBottom();
+    // const intervalId = setInterval(getNewMessages, 3000); // Fetch new messages every 3 seconds
+    // return () => clearInterval(intervalId); // Cleanup the interval on component unmount
+  }, [mostRecentId]);
     // const intervalId = setInterval(getNewMessages, 3000); // Fetch new messages every 3 seconds
     // return () => clearInterval(intervalId); // Cleanup the interval on component unmount
   }, [mostRecentId]);
@@ -69,6 +87,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
   const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
     const topReached = e.currentTarget.scrollTop === 0;
     if (topReached && !loadingPrevMessages) {
+      // getPrevMessages();
+      chatClient.getNextMessages();
       // getPrevMessages();
       chatClient.getNextMessages();
     }
@@ -114,14 +134,20 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
         <>
           <ul className="chat-message-list" onScroll={handleScroll} ref={messageListRef}>
             {[...messageList].reverse().map((message, index) => (
+            {[...messageList].reverse().map((message, index) => (
               <li
                 key={index}
+                className={`chat-message ${isCurrentUser(message.user) ? "user-message" : "other-message"}`}
+                title={message.timestamp.toString()}
                 className={`chat-message ${isCurrentUser(message.user) ? "user-message" : "other-message"}`}
                 title={message.timestamp.toString()}
               >
                 <strong className={` ${isCurrentUser(message.user) ? "userTitleSelf" : "userTitleOther"}`}>
                   {message.user}
+                <strong className={` ${isCurrentUser(message.user) ? "userTitleSelf" : "userTitleOther"}`}>
+                  {message.user}
                 </strong>
+                {message.message}
                 {message.message}
               </li>
             ))}
