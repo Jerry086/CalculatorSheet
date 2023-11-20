@@ -293,3 +293,14 @@ Upon manual testing button works as expected and fits page theme.
 # Bug 6 Long user name overflow the cell
 The bug is fixed by limiting user name's length to 1 - 12 characters and only consists of alphanumeric characters.
 ## Fix status: Fixed
+
+
+# Bug 7 Can access url without login
+
+##  Ticket
+
+Users can access spreadsheet pages directly via url without setting a username. Spreadsheet page should redirect users to login page if username is not set.
+
+## User Story
+
+As a user I should not be able to access the spreadsheet page without being logged in/having a username. Even though the lack of a password system means this is not a security issue right now - it can still mean I'm unable to change things yet don't see a way to login on the page itself.
