@@ -112,6 +112,7 @@ export class SpreadSheetController {
     // Is the user editing another cell? If so then release the other cell
     if (userData!.isEditing && userData!.cellLabel !== cellLabel) {
       this.releaseEditAccess(user);
+      userData!.isEditing = false;
     }
 
     // at this point the user is a contributing user and is not editing another cell
