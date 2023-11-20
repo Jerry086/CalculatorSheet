@@ -59,6 +59,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// initialize the engine
 const documentHolder = new DocumentHolder();
 const database = new Database();
 
@@ -77,10 +78,9 @@ app.get("/documents", (req: express.Request, res: express.Response) => {
 // PUT /documents/:name
 // userName is in the document body
 app.put("/documents/:name", (req: express.Request, res: express.Response) => {
-  console.log("PUT /documents/:name");
   const name = req.params.name;
   // get the userName from the body
-  console.log(`PUT /documents/:name ${name}`);
+  // console.log(`PUT /documents/:name ${name}`);
   const userName = req.body.userName;
   if (!userName) {
     res.status(400).send("userName is required");
@@ -284,8 +284,7 @@ app.put(
 
 // reset the database
 app.get("/reset", (req, res) => {
-  console.log("get /reset");
-  console.log("Resetting the database per user request");
+  console.log("GET /reset");
   database.reset();
   return res.json({ message: "reset" });
 });
@@ -317,9 +316,11 @@ app.get("/messages/get/:pagingToken?", (req, res) => {
   // if there is no :pagingToken, then it will be an empty string
 
   let pagingToken = req.params.pagingToken || "";
+  if (pagingToken) {
+    console.log(`get /messages/get/${pagingToken}`);
+  }
 
   const result = database.getMessages(pagingToken);
-  console.log(`get /messages/get/${pagingToken}`);
   return res.json(result);
 });
 

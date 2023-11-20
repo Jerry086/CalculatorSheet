@@ -16,7 +16,6 @@ const chatClient = new ChatClient();
 const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [loadingPrevMessages, setLoadingPrevMessages] = useState(false);
   const [messageList, setMessageList] = useState<MessageContainer[]>([]);
   const [mostRecentId, setMostRecentId] = useState<number>(-1);
   const messageListRef = useRef<HTMLUListElement>(null);
@@ -49,16 +48,12 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
     return userName === messageUsername;
   };
 
-  // START at bottom of messages
   // scroll to bottom when new message is added
   useEffect(() => {
     scrollToBottom();
-    // const intervalId = setInterval(getNewMessages, 3000); // Fetch new messages every 3 seconds
-    // return () => clearInterval(intervalId); // Cleanup the interval on component unmount
   }, [mostRecentId]);
 
   
-
   const scrollToBottom = () => {
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
@@ -67,8 +62,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
 
   const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
     const topReached = e.currentTarget.scrollTop === 0;
-    if (topReached && !loadingPrevMessages) {
-      // getPrevMessages();
+    if (topReached) {
       chatClient.getNextMessages();
     }
   };
@@ -100,12 +94,10 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
 
   const handleSendMessage = () => {
     if (inputValue.length < 1) {
-      console.log("Error: message cannot be empty");
+      alert("Input cannot be empty.");
     } else {
       // chatClient.sendMessage(inputValue, userName);
       chatClient.sendMessagePost(inputValue, userName);
-
-      // alert(inputValue);
       setInputValue(""); // Clear the input field after sending the message
     }
   };
