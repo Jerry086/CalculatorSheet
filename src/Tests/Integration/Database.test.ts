@@ -4,7 +4,6 @@ import {
   MessagesContainer,
   MessageContainer,
 } from "../../Engine/GlobalDefinitions";
-import { get } from "http";
 
 describe("Database", () => {
   let userJose = "Jose";
@@ -46,37 +45,6 @@ describe("Database", () => {
     expect(messages.messages[0].message).toBe("Message 9");
   });
 
-  test("getMessages 15", () => {
-    let db = new Database();
-    for (let i = 0; i < 15; i++) {
-      db.addMessage(userJose, `Message ${i}`);
-    }
-
-    let messages = db.getMessages("");
-    const paginationToken = messages.paginationToken;
-    expect(paginationToken).toBe("__0000000004__");
-    expect(messages.messages.length).toBe(10);
-
-    messages = db.getMessages(messages.paginationToken);
-    expect(messages.messages.length).toBe(5);
-    expect(messages.paginationToken).toBe("__END__");
-  });
-  test("getMessages 20", () => {
-    let db = new Database();
-    for (let i = 0; i < 20; i++) {
-      db.addMessage(userJose, `Message ${i}`);
-    }
-
-    let messages = db.getMessages("");
-    const paginationToken = messages.paginationToken;
-    expect(paginationToken).toBe("__0000000009__");
-    expect(messages.messages.length).toBe(10);
-
-    messages = db.getMessages(messages.paginationToken);
-    expect(messages.messages.length).toBe(10);
-    expect(messages.paginationToken).toBe("__END__");
-  });
-
   test("getMessages 25", () => {
     let db = new Database();
     for (let i = 0; i < 25; i++) {
@@ -85,11 +53,42 @@ describe("Database", () => {
 
     let messages = db.getMessages("");
     const paginationToken = messages.paginationToken;
-    expect(paginationToken).toBe("__0000000014__");
-    expect(messages.messages.length).toBe(10);
+    expect(paginationToken).toBe("__0000000004__");
+    expect(messages.messages.length).toBe(20);
+
+    messages = db.getMessages(messages.paginationToken);
+    expect(messages.messages.length).toBe(5);
+    expect(messages.paginationToken).toBe("__END__");
+  });
+  test("getMessages 30", () => {
+    let db = new Database();
+    for (let i = 0; i < 30; i++) {
+      db.addMessage(userJose, `Message ${i}`);
+    }
+
+    let messages = db.getMessages("");
+    const paginationToken = messages.paginationToken;
+    expect(paginationToken).toBe("__0000000009__");
+    expect(messages.messages.length).toBe(20);
 
     messages = db.getMessages(messages.paginationToken);
     expect(messages.messages.length).toBe(10);
+    expect(messages.paginationToken).toBe("__END__");
+  });
+
+  test("getMessages 45", () => {
+    let db = new Database();
+    for (let i = 0; i < 45; i++) {
+      db.addMessage(userJose, `Message ${i}`);
+    }
+
+    let messages = db.getMessages("");
+    const paginationToken = messages.paginationToken;
+    expect(paginationToken).toBe("__0000000024__");
+    expect(messages.messages.length).toBe(20);
+
+    messages = db.getMessages(messages.paginationToken);
+    expect(messages.messages.length).toBe(20);
     expect(messages.paginationToken).toBe("__0000000004__");
 
     messages = db.getMessages(messages.paginationToken);
@@ -97,25 +96,25 @@ describe("Database", () => {
     expect(messages.paginationToken).toBe("__END__");
   });
 
-  test("getMessages 25 +1", () => {
+  test("getMessages 45 +1", () => {
     let db = new Database();
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 45; i++) {
       db.addMessage(userJose, `Message ${i}`);
     }
 
     let messages = db.getMessages("");
-    expect(messages.paginationToken).toBe("__0000000014__");
-    expect(messages.messages.length).toBe(10);
+    expect(messages.paginationToken).toBe("__0000000024__");
+    expect(messages.messages.length).toBe(20);
 
     db.addMessage(userJose, `Message Well hello there!`);
 
     let otherMessages = db.getMessages("");
-    expect(otherMessages.messages.length).toBe(10);
-    expect(otherMessages.paginationToken).toBe("__0000000015__");
+    expect(otherMessages.messages.length).toBe(20);
+    expect(otherMessages.paginationToken).toBe("__0000000025__");
 
     // Use the old pagination Token it should still work and give me 0004 as the result
     messages = db.getMessages(messages.paginationToken);
-    expect(messages.messages.length).toBe(10);
+    expect(messages.messages.length).toBe(20);
     expect(messages.paginationToken).toBe("__0000000004__");
 
     db.addMessage(userJose, `Message Well hello there! Again!`);
@@ -125,7 +124,7 @@ describe("Database", () => {
     expect(messages.paginationToken).toBe("__END__");
 
     otherMessages = db.getMessages("");
-    expect(otherMessages.messages.length).toBe(10);
-    expect(otherMessages.paginationToken).toBe("__0000000016__");
+    expect(otherMessages.messages.length).toBe(20);
+    expect(otherMessages.paginationToken).toBe("__0000000026__");
   });
 });
