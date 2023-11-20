@@ -1,0 +1,14 @@
+[
+  {
+    "message": "Hi all, I'm Bob.\n",
+    "user": "bob",
+    "id": 1,
+    "timestamp": "2023-11-20T03:43:54.716Z"
+  },
+  {
+    "message": "Hi all, I'm Alice.\n",
+    "user": "alice",
+    "id": 0,
+    "timestamp": "2023-11-20T03:43:39.328Z"
+  }
+]
