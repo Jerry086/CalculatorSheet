@@ -1,7 +1,9 @@
-/**
- * ChatClient
+/** this is the class for the front end to prepare the fetch
+ * requests to the server for the chat messages
  *
- * @export
+ * it is used by chatComponent.tsx
+ *
+ * It provides the following calls.
  *
  */
 
@@ -31,10 +33,8 @@ class ChatClient {
     const isProduction = process.env.NODE_ENV === "production";
     if (isProduction) {
       this.setServerSelector("renderhost");
-      console.log(" Running production client");
     } else {
       this.setServerSelector("localhost"); // change this to renderhost if you want to default to renderhost
-      console.log(" Running development client");
     }
 
     this.getMessages();
@@ -78,7 +78,6 @@ class ChatClient {
 
       return;
     }
-    // console.log(`Message is not inserted ${messageID}`)
   }
 
   /**
@@ -99,7 +98,6 @@ class ChatClient {
    */
   getMessages(pagingToken: string = "") {
     const url = `${this._baseURL}/messages/get/`;
-    //const url = `https://pagination-demo.onrender.com/messages/get`
 
     const fetchURL = `${url}${pagingToken}`;
     fetch(fetchURL)
@@ -120,7 +118,7 @@ class ChatClient {
    * get the messages once a second
    */
   getMessagesContinuously() {
-    console.log("getMessagesContinuously()");
+    // console.log("getMessagesContinuously()");
     setInterval(() => {
       this.getMessages();
     }, 1000);
@@ -152,38 +150,17 @@ class ChatClient {
     const url = `${this._baseURL}/message`;
 
     const data = {
-        user: user,
-        message: message
+      user: user,
+      message: message,
     };
 
     fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     })
-    .then((response) => response.json())
-    .then((messagesContainer: MessagesContainer) => {
-        let messages = messagesContainer.messages;
-        this.insertMessages(messages);
-    })
-    .catch((error) => {
-        console.error(error);
-    });
-  }
-
-  /**
-   * send a message to the server
-   * @param message a message to send to the server
-   * @param user the user who sent the message
-   */
-  sendMessage(message: string, user: string) {
-    console.log("sentMessage()");
-    const url = `${this._baseURL}/message/${user}/${message}`;
-    //const url = `https://pagination-demo.onrender.com/message/${user}/${message}`
-
-    fetch(url)
       .then((response) => response.json())
       .then((messagesContainer: MessagesContainer) => {
         let messages = messagesContainer.messages;
@@ -209,6 +186,5 @@ class ChatClient {
     this._server = server;
   }
 }
-
 
 export default ChatClient;

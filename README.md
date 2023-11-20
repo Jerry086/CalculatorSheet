@@ -1,6 +1,27 @@
-# Getting Started with Create React App
+# CS5500 - Chat Features - Team Hu
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was deployed on Render. You can find the deployed project at [https://calsheet-hu-client.onrender.com/](https://calsheet-hu-client.onrender.com/).
+
+Note: the frontend server and backend server spins down after inactivity. It's normal to see the client homepage is not responding or the document list is empty when you first visit the site in a while. Please allow a couple of minutes for the servers to spin up before using the app.
+
+Alternatively, you can run the project locally by following the instructions below.
+
+1. Install the necessary dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Start the server:
+
+   ```bash
+   npm run start-server
+   ```
+
+3. Launch the project:
+   ```bash
+   npm run start
+   ```
 
 ## Available Scripts
 

@@ -37,9 +37,16 @@
     },
     {
       "type": "node-terminal",
-      "name": "Run test suite for server",
+      "name": "Run test suite for document server",
       "request": "launch",
       "command": "ts-node src/Server/DocumentServerTester.ts",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node-terminal",
+      "name": "Run test suite for chat server",
+      "request": "launch",
+      "command": "ts-node src/Server/ChatServerTester.ts",
       "cwd": "${workspaceFolder}"
     },
     {
@@ -47,6 +54,20 @@
       "name": "Run Script: eject",
       "request": "launch",
       "command": "npm run eject",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node-terminal",
+      "name": "Jest Chat Database",
+      "request": "launch",
+      "command": "npx jest Database",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node-terminal",
+      "name": "Jest DocumentHolder",
+      "request": "launch",
+      "command": "npx jest DocumentHolder",
       "cwd": "${workspaceFolder}"
     },
     {
@@ -86,30 +107,9 @@
     },
     {
       "type": "node-terminal",
-      "name": "Jest ChatManager",
-      "request": "launch",
-      "command": "npx jest ChatManager",
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "type": "node-terminal",
       "name": "Jest Calculation",
       "request": "launch",
       "command": "npx jest CalculationManager",
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "type": "node-terminal",
-      "name": "Jest DocumentHolder",
-      "request": "launch",
-      "command": "npx jest DocumentHolder",
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "type": "node-terminal",
-      "name": "Jest SpreadSheet",
-      "request": "launch",
-      "command": "npx jest SpreadSheet --runInBand",
       "cwd": "${workspaceFolder}"
     },
     {
@@ -125,6 +125,6 @@
       "request": "launch",
       "command": "npm run build",
       "cwd": "${workspaceFolder}"
-    },
+    }
   ]
 }
