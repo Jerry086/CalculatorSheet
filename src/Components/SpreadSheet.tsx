@@ -54,7 +54,7 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
     setCurrentlyEditing(spreadSheetClient.getEditStatus());
   }
 
-  // useEffect to refetch the data every 1/20 of a second
+  // useEffect to refetch the data every 1/20 of a second todo
   useEffect(() => {
     const documentName = spreadSheetClient.documentName;
     if (isUnlocked.includes(documentName)) {
@@ -63,17 +63,17 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
       setIsUnlocked(false);
     }
 
-    // Interval to fetch updated sheet data every 30 seconds
+    // Interval to fetch updated sheet data every 30 seconds todo
     const interval = setInterval(() => {
       const sheets = spreadSheetClient.getSheets();
       const data = dummyGetSpreadSheetData(sheets);
 
-      // Update isUnlocked state based on fetched data
+      // Update isUnlocked state based on fetched data todo
       setIsUnlocked(
         sheets.filter(sheet => data[sheet].isUnlocked)
       );
 
-      // Notify server of active user for each sheet
+      // Notify server of active user for each sheet todo
       sheets.forEach(sheetName => {
         // server.userIsActive({ username: userName, sheetName });
       });
@@ -95,7 +95,7 @@ interface SheetsDataType {
   [key: string]: SheetData;
 }
 
-
+//  todo
   function dummyGetSpreadSheetData(sheets: string[]): SheetsDataType {
     const data: SheetsDataType = {};
   
@@ -120,6 +120,7 @@ interface SheetsDataType {
   }
 
   function returnToLoginPage() {
+    //  todo - automatic call method if logged out
 
     // set the document name
     spreadSheetClient.documentName = documentName;
@@ -144,6 +145,7 @@ interface SheetsDataType {
   }
 
   function checkPerms(): boolean {
+    //  todo
     const documentName = spreadSheetClient.documentName;
 
     // check if sheet is locked
@@ -168,6 +170,20 @@ interface SheetsDataType {
       return true;
     }
   }
+
+
+  function checkPermsMessenger(): boolean {
+    //  todo - but in the sub-component ChatComponent.
+    // maybe define here and pass to chatComponent
+    // is messenger locked?
+    // if no return true
+
+    // if yes does user have by pass perrmission
+    // if yes 
+      return true;
+      // else return false
+    }
+ 
 
   /**
    * 
@@ -249,6 +265,10 @@ interface SheetsDataType {
    * If the edit status is false then it will ask the machine to update the current formula.
    */
   function onCellClick(event: React.MouseEvent<HTMLButtonElement>): void {
+
+    if(checkPerms()){
+      alert( "Sheet is locked")
+    }
 
     if (userName === "") {
       alert("Please enter a user name");
