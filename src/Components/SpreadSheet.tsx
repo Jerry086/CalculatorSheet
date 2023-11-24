@@ -32,7 +32,15 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
   const [currentCell, setCurrentCell] = useState(spreadSheetClient.getWorkingCellLabel());
   const [currentlyEditing, setCurrentlyEditing] = useState(spreadSheetClient.getEditStatus());
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
-  const [serverSelected, setServerSelected] = useState("localhost");
+  const [isAdmin, setIsAdmin] = useState(window.sessionStorage.getItem('isAdmin') === 'true');
+  const [isAdminKey, setIsAdminKey] = useState(window.sessionStorage.getItem('isAdminKey') || "");
+  const [isUnlocked, setIsUnlocked] = useState(
+    JSON.parse(window.sessionStorage.getItem('lockedSheets') || "[]")
+  );
+  const [userBypassPermissions, setUserBypassPermissions] = useState(() => {
+    const savedPermissions = window.sessionStorage.getItem('userBypassPermissions');
+    return savedPermissions ? JSON.parse(savedPermissions) : [];
+  });  const [serverSelected, setServerSelected] = useState("localhost");
 
 
   function updateDisplayValues(): void {
@@ -48,11 +56,68 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
 
   // useEffect to refetch the data every 1/20 of a second
   useEffect(() => {
+    const documentName = spreadSheetClient.documentName;
+    if (isUnlocked.includes(documentName)) {
+      setIsUnlocked(true);
+    } else {
+      setIsUnlocked(false);
+    }
+
+    // Interval to fetch updated sheet data every 30 seconds
     const interval = setInterval(() => {
-      updateDisplayValues();
-    }, 50);
+      const sheets = spreadSheetClient.getSheets();
+      const data = dummyGetSpreadSheetData(sheets);
+
+      // Update isUnlocked state based on fetched data
+      setIsUnlocked(
+        sheets.filter(sheet => data[sheet].isUnlocked)
+      );
+
+      // Notify server of active user for each sheet
+      sheets.forEach(sheetName => {
+        // server.userIsActive({ username: userName, sheetName });
+      });
+    }, 30000);
+
     return () => clearInterval(interval);
-  });
+  }, [userName]);
+    // const interval = setInterval(() => {
+    //   updateDisplayValues();
+    // }, 50);
+    // return () => clearInterval(interval);
+  // });
+  
+  interface SheetData {
+    isUnlocked: boolean;
+    activeUsers: string[];
+  }
+interface SheetsDataType {
+  [key: string]: SheetData;
+}
+
+
+  function dummyGetSpreadSheetData(sheets: string[]): SheetsDataType {
+    const data: SheetsDataType = {};
+  
+    // Specific sheets to modify
+    const specificSheets = ['test1', 'test10.1', 'test10', 'test11', 'test12', 'test13'];
+    let index = 1;
+  
+    sheets.forEach(sheet => {
+      if (specificSheets.includes(sheet)) {
+        // For specific sheets, set isUnlocked to false and add fake usernames
+        data[sheet] = {
+          isUnlocked: false,
+          activeUsers: Array.from({ length: index++ }, (_, i) => `user${i + 1}`)
+        };
+      } else if (!data[sheet]) {
+        // For other sheets, retain existing logic
+        data[sheet] = { isUnlocked: true, activeUsers: [] };
+      }
+    });
+  
+    return data;
+  }
 
   function returnToLoginPage() {
 
@@ -76,6 +141,32 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
       return false;
     }
     return true;
+  }
+
+  function checkPerms(): boolean {
+    const documentName = spreadSheetClient.documentName;
+
+    // check if sheet is locked
+    if (isUnlocked) {
+      // unlocked return true
+      return true;
+    } else {
+      // check if user has bypass permissions
+      if (userBypassPermissions.includes(documentName)) {
+        // yes return true
+        return true;
+      } else {
+        // check if user is admin
+        if (isAdmin) {
+          return true;
+          //  yes return true
+        } else {
+          // no return false
+          // return false;
+        }
+      }
+      return true;
+    }
   }
 
   /**

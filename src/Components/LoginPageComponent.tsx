@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LoginPageComponent.css';
+import './loginPageOnlyCSS.css';
 
 /**
  * Login PageComponent is the component that will be used to display the login page
@@ -16,10 +17,33 @@ import { spread } from 'axios';
 interface LoginPageProps {
   spreadSheetClient: SpreadSheetClient;
 }
+interface LoginResponse {
+  username: string;
+  isAdmin: boolean;
+  isAdminKey?: string;
+}
 
-function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element {
+interface LoginError {
+  error: string;
+}
+
+interface SheetData {
+  isUnlocked: boolean;
+  activeUsers: string[];
+}
+
+interface SheetsDataType {
+  [key: string]: SheetData;
+}
+
+
+function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element {
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
+  const [isAdmin, setIsAdmin] = useState(window.sessionStorage.getItem('isAdmin') === 'true');
+  const [isAdminKey, setIsAdminKey] = useState(window.sessionStorage.getItem('isAdminKey') || "");
   const [documents, setDocuments] = useState<string[]>([]);
+  const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
+
 
   // SpreadSheetClient is fetching the documents from the server so we should
   // check every 1/20 of a second to see if the documents have been fetched
@@ -30,9 +54,65 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
         setDocuments(sheets);
       }
     }, 50);
+
+    const sheets = spreadSheetClient.getSheets();
+    const data = dummyGetSpreadSheetData(sheets);
+    setSheetsData(data);
+
+
     return () => clearInterval(interval);
   });
 
+  // creates toolbar for admin users -TODO
+  function buildToolbar() {
+    return (
+      <div className="toolbar">
+        <button >Lock All</button> 
+        <button >Unlock All</button> 
+        <button >Mute Chat</button>
+        <button >Unmute Chat</button>
+      </div>
+    );
+    //TODO ADD METHODS
+    // onClick={console.log("lockAll")}
+    //  onClick={console.log("unlockAll") }
+    //  onClick={console.log("muteChat")}
+    // onClick={console.log("unmuteChat")}
+  }
+    
+// fetches extra info for admin users -TODO
+  function dummyGetSpreadSheetData(sheets: string[]): SheetsDataType {
+    const data: SheetsDataType = {};
+  
+    // Specific sheets to modify - dummy data 
+    // replace with call to backend with isAdminKey
+    const specificSheets = ['test1', 'test10.1', 'test10', 'test11', 'test12', 'test13'];
+    let index = 1;
+  
+    sheets.forEach(sheet => {
+      if (specificSheets.includes(sheet)) {
+        // For specific sheets, set isUnlocked to false and add fake usernames
+        data[sheet] = {
+          isUnlocked: false,
+          activeUsers: Array.from({ length: index++ }, (_, i) => `user${i + 1}`)
+        };
+      } else if (!data[sheet]) {
+        // For other sheets, retain existing logic
+        data[sheet] = { isUnlocked: true, activeUsers: [] };
+      }
+    });
+  
+    return data;
+  }
+    
+  // dummy function to set new state for sheets todo
+  function dummyToggleLockStatus(sheetName: string , newStatus: boolean, isAdminKey: string) {
+      // Simulate toggling the lock status
+      // This should be replaced with a real server call
+    }
+    
+
+    // old function to try and log in - used for normal users
   function getUserLogin() {
     return <div>
       <input
@@ -56,19 +136,58 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
 
   }
 
+  //updated login funtion - for admin name request login info
+  // need to write back end and way to set admin names todo
   function handleLogin() {
     const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
-    if (checkUserNameInput()) {
+  
+    if (checkUserNameInput()) { //is username not blank
       const userName = userNameInput.value;
-      if(!checkUserName(userName)) {
+      if (!checkUserName(userName)) { // if username matches regex 
         return;
       }
-      window.sessionStorage.setItem('userName', userName);
-      setUserName(userName);
-      spreadSheetClient.userName = userName;
+  
+      const loginResponse = dummyLoginCall(userName);
+      // TODO
+  
+      if ('error' in loginResponse) {
+        alert(loginResponse.error);
+        return;
+      }
+  
+      window.sessionStorage.setItem('userName', loginResponse.username);
+      window.sessionStorage.setItem('isAdmin', loginResponse.isAdmin.toString());
+      if (loginResponse.isAdmin && loginResponse.isAdminKey) {
+        window.sessionStorage.setItem('isAdminKey', loginResponse.isAdminKey!);
+      }
+  
+      setUserName(loginResponse.username);
+      setIsAdmin(loginResponse.isAdmin);
+      if (loginResponse.isAdminKey) {
+        setIsAdminKey(loginResponse.isAdminKey);
+      }
+      spreadSheetClient.userName = loginResponse.username;
     }
   }
   
+
+  
+  //updated login funtion handler - for admin name request login info
+  // need to write back end and way to set admin names todo
+  function dummyLoginCall(userName: string): LoginResponse | LoginError {
+    if (userName === "Admin") { // call to server, check if admin user
+      const password = prompt("Please enter your password");
+      if (password === "password") { // call to server to authenticate - encrypt this
+        return { username: "Admin", isAdmin: true, isAdminKey: "secretKey" }; // secretKey should be encrypted token
+      } else {
+        return { error: "Wrong password" };
+      }
+    } else {
+      return { username: userName, isAdmin: false };
+    }
+  }
+
+  // old function for checking username
   function checkUserName(userName: string): boolean {
     /*
     if (userName === "") {
@@ -84,6 +203,7 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
     return true;
   }
 
+  // old function for checking username
   function checkUserNameInput(): boolean {
     const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
     const userName = userNameInput.value;
@@ -95,7 +215,7 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
     return true;
   }
 
-
+  // old function 
   function loadDocument(documentName: string) {
     // set the document name
     spreadSheetClient.documentName = documentName;
@@ -111,16 +231,77 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
 
   }
 
-
+// updated to account for new state vars
   function logout() {
     // clear the user name
-    window.sessionStorage.setItem('userName', "");
+    // window.sessionStorage.setItem('userName', "");
+    window.sessionStorage.removeItem('userName');
+    window.sessionStorage.removeItem('isAdmin');
+    window.sessionStorage.removeItem('isAdminKey');
     // reload the page
     window.location.reload();
   }
 
-
-  function buildFileSelector() {
+ // new admin view
+  function buildFileSelectorAdmin(sheetsData: SheetsDataType, setSheetsData: React.Dispatch<React.SetStateAction<SheetsDataType>>) {
+    const sheets = spreadSheetClient.getSheets();
+  
+    function handleSubmitDummy() {
+      Object.keys(sheetsData).forEach(sheetName => {
+        dummyToggleLockStatus(sheetName, sheetsData[sheetName].isUnlocked, isAdminKey);
+      });
+    }
+  
+    return (
+      <div>
+        <h1>Teacher View</h1>
+        {buildToolbar()}
+        <table>
+          <thead>
+            <tr className="selector-title">
+              <th>Document Name</th> 
+              <th>Lock Status</th>
+              <th>Active Users</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.keys(sheetsData).map(sheetName => {
+              if(sheetName.indexOf("test1") == -1){sheetsData[sheetName].isUnlocked = false;}
+              const sheet = sheetsData[sheetName];
+              return (
+                <tr className="selector-item">
+                  <td className="left" >{sheetName}</td>
+                  <td className="notLeft">
+                    <input
+                      type="checkbox"
+                      onChange={(e) => {
+                        setSheetsData({
+                          ...sheetsData,
+                          [sheetName]: { ...sheet, isUnlocked: !e.target.checked }
+                        });
+                        e.target.style.borderColor = 'red'; // indicate unsaved change
+                      }}
+                    /> 
+                    <span>{!sheet.isUnlocked && "🔒"  }</span>
+                  </td>
+                  <td style={{ width: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }}  className="notLeft" title={sheet.activeUsers.join(', ')}>
+                    {sheet.activeUsers.join(', ')}
+                  </td>
+                  <td>
+                    <button onClick={() => loadDocument(sheetName)}>Edit</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <button onClick={handleSubmitDummy}>Submit</button>
+      </div>
+    );
+  }
+  
+  function buildFileSelectorStudent() {
     if (userName === "") {
       return <div>
         <h4>Please enter a user name</h4>
@@ -133,6 +314,7 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
     const sheets: string[] = spreadSheetClient.getSheets();
     // make a table with the list of sheets and a button beside each one to edit the sheet
     return <div>
+      <h1>Student View</h1>
       <table>
         <thead>
           <tr className="selector-title">
@@ -143,9 +325,12 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
         </thead>
         <tbody>
           {sheets.map((sheet) => {
+              if(sheetsData && sheet.indexOf("test1") == -1 && sheetsData[sheet]){sheetsData[sheet].isUnlocked = false;} // todo dummy data
+             const sheet1 = sheetsData[sheet]; 
             return <tr className="selector-item">
-              <td >{sheet}</td>
+              <td  >{sheet}    <span>{sheet1 && !sheet1.isUnlocked && "🔒"  }</span></td>
               <td><button onClick={() => loadDocument(sheet)}>
+                 {/* // todo disable button? */}
                 Edit
               </button></td>
             </tr>
@@ -167,6 +352,10 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
 
   function loginPage() {
 
+    console.log("username & isadmin are ");
+    userName && console.log(userName);
+    isAdmin && console.log(isAdmin);
+
     return <table>
 
 
@@ -176,7 +365,7 @@ function LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element 
             {getLoginPanel()}
           </td>
           <td>
-            {buildFileSelector()}
+          {userName ? (isAdmin ? buildFileSelectorAdmin(sheetsData, setSheetsData) : buildFileSelectorStudent()) : null}
           </td>
         </tr>
       </tbody>
