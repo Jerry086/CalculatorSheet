@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
-import { sha256 } from 'crypto';
+import { SHA256 } from 'crypto-js';
 
 /**
  * Login PageComponent is the component that will be used to display the login page
@@ -199,6 +199,36 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
     }
   }
 
+
+// Function to check if the password is correct (replace with actual backend implementation)
+async function backendCheckPassword(encryptedPassword: string): Promise<boolean> {
+  // Simulate a backend request (replace with actual fetch or axios call)
+  const response = await fetch('https://dummy-backend-url/check-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ encryptedPassword }),
+  });
+
+  // Assuming the backend returns a JSON object with a 'isPasswordCorrect' property
+  const result = await response.json();
+
+  return result.isPasswordCorrect; // Replace with actual property based on your backend response
+}
+
+// Function to get admin info from the backend
+async function backendGetAdminInfo(userName: string): Promise<{ isAdminKey: string } | null> {
+  // Simulate a backend request (replace with actual fetch or axios call)
+  const response = await fetch('https://dummy-backend-url/get-admin-info', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userName }),
+  });
+
+
 // Function to initiate the login process
 async function loginCall(userName: string): Promise<LoginResponse | LoginError> {
   if (userName === "Admin") {
@@ -207,7 +237,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
     if (password != null && password !== "") {
       console.log("password is " + password);
 
-      const encryptedPassword = sha256(password).toString('hex');
+      const encryptedPassword = SHA256(password).toString();
 
       try {
         // Send encrypted password to backend to check if correct
@@ -241,34 +271,6 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
     return { username: userName, isAdmin: false, isAdminKey: "" };
   }
 }
-
-// Function to check if the password is correct (replace with actual backend implementation)
-async function backendCheckPassword(encryptedPassword: string): Promise<boolean> {
-  // Simulate a backend request (replace with actual fetch or axios call)
-  const response = await fetch('https://dummy-backend-url/check-password', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ encryptedPassword }),
-  });
-
-  // Assuming the backend returns a JSON object with a 'isPasswordCorrect' property
-  const result = await response.json();
-
-  return result.isPasswordCorrect; // Replace with actual property based on your backend response
-}
-
-// Function to get admin info from the backend
-async function backendGetAdminInfo(userName: string): Promise<{ isAdminKey: string } | null> {
-  // Simulate a backend request (replace with actual fetch or axios call)
-  const response = await fetch('https://dummy-backend-url/get-admin-info', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ userName }),
-  });
 
   // Assuming the backend returns a JSON object with an 'adminInfo' property
   const result = await response.json();
