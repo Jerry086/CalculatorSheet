@@ -68,4 +68,5 @@ export interface UserContainer {
 
 export interface UsersContainer {
   users: UserContainer[];
+  error: string;
 }

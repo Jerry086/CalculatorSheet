@@ -32,6 +32,7 @@ import cors from "cors";
 import { DocumentHolder } from "../Engine/DocumentHolder";
 import { PortsGlobal } from "../ServerDataDefinitions";
 import { Database } from "../Engine/Database";
+import UserController from "../Engine/UserController";
 
 // define a debug flag to turn on debugging
 let debug = true;
@@ -62,6 +63,7 @@ app.use((req, res, next) => {
 // initialize the engine
 const documentHolder = new DocumentHolder();
 const database = new Database();
+const userController = new UserController();
 
 // test the server
 app.get("/ping", (req, res) => {

@@ -56,6 +56,10 @@ class UserController {
    * @memberof UserController
    */
   private users: User[] = [];
+  private error: string = "";
+  private plaintextPassword: string = "teamHu";
+  private hashedPassword: string = "";
+  private bcrypt = require("bcrypt");
 
   /**
    * Creates an instance of Database.
@@ -63,10 +67,29 @@ class UserController {
    */
   constructor() {
     this.users = [];
+    this.error = "";
+    this.hashedPassword = "";
+    // hash the password
+    const saltRounds: number = 10;
+
+    this.bcrypt.hash(
+      this.plaintextPassword,
+      saltRounds,
+      (err: any, hash: string) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        // Store 'hash' in the database
+        this.hashedPassword = hash;
+        console.log("hashed password:", this.hashedPassword);
+      }
+    );
   }
 
   reset() {
     this.users = [];
+    this.error = "";
   }
 
   /**
@@ -100,11 +123,33 @@ class UserController {
   getAllUsers(): UsersContainer {
     const result: UsersContainer = {
       users: this.users,
+      error: this.error,
     };
+    this.error = "";
     return result;
   }
 
-  // authenticate a user
+  // promote a user to admin
+  promoteUser(user: string, password: string): boolean {
+    const index = this.users.findIndex((u) => u.user === user);
+    if (index === -1) {
+      this.error = "User not found";
+      return false;
+    }
+    this.bcrypt.compare(
+      password,
+      this.hashedPassword,
+      (err: any, result: any) => {
+        if (!result) {
+          // Passwords don't match
+          this.error = "Password is incorrect";
+          return false;
+        }
+      }
+    );
+    this.users[index].isAdmin = true;
+    return true;
+  }
 
   // check if a user is an admin
   isAdmin(user: string): boolean {

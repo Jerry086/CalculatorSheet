@@ -28,7 +28,8 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
     "whatwg-url": "^13.0.0",
-    "zlib": "^1.0.5"
+    "zlib": "^1.0.5",
+    "bcrypt": "^5.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -65,7 +66,6 @@
     "axios": "^1.4.0",
     "react-memory-stats": "^0.2.0",
     "ts-jest": "^29.1.0",
-    "uuid": "^9.0.0",
-    "bcrypt": "^5.0.0"
+    "uuid": "^9.0.0"
   }
 }
