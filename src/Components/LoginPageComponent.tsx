@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
 import { SHA256 } from 'crypto-js';
+import bcrypt from 'bcryptjs';
 
 /**
  * Login PageComponent is the component that will be used to display the login page
@@ -227,7 +228,24 @@ async function backendGetAdminInfo(userName: string): Promise<{ isAdminKey: stri
     },
     body: JSON.stringify({ userName }),
   });
+  // Assuming the backend returns a JSON object with an 'isAdminKey' property
+  const result = await response.json();
 
+  return result.isAdminKey ? { isAdminKey: result.isAdminKey } : null;
+}
+
+async function hashPassword(password: string) {
+  const saltRounds = 10;
+
+  try {
+    const hash = await bcrypt.hash(password, saltRounds);
+    console.log('Hash to store:', hash);
+    return hash;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
 
 // Function to initiate the login process
 async function loginCall(userName: string): Promise<LoginResponse | LoginError> {
@@ -237,31 +255,31 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
     if (password != null && password !== "") {
       console.log("password is " + password);
 
-      const encryptedPassword = SHA256(password).toString();
+        const encryptedPassword = await hashPassword(password)
 
-      try {
-        // Send encrypted password to backend to check if correct
-        const isPasswordCorrect = await backendCheckPassword(encryptedPassword);
+        try {
+          // Send encrypted password to backend to check if correct
+          const isPasswordCorrect = await backendCheckPassword(encryptedPassword);
 
-        if (isPasswordCorrect) {
-          // Get admin info from backend
-          const adminInfo = await backendGetAdminInfo(userName);
+          if (isPasswordCorrect) {
+            // Get admin info from backend
+            const adminInfo = await backendGetAdminInfo(userName);
 
-          if (adminInfo) {
-            // Return the authenticated admin response
-            return { username: "Admin", isAdmin: true, isAdminKey: adminInfo.isAdminKey };
+            if (adminInfo) {
+              // Return the authenticated admin response
+              return { username: "Admin", isAdmin: true, isAdminKey: adminInfo.isAdminKey };
+            } else {
+              // Return an error if unable to retrieve admin info
+              return { error: "Unable to retrieve admin info" };
+            }
           } else {
-            // Return an error if unable to retrieve admin info
-            return { error: "Unable to retrieve admin info" };
+            // Return an error for wrong password
+            return { error: "Wrong password" };
           }
-        } else {
-          // Return an error for wrong password
-          return { error: "Wrong password" };
-        }
-      } catch (error) {
-        // Handle any errors that occurred during the backend calls
-        return { error: "Backend error: " + (error instanceof Error ? error.message : "Unknown error") };
-      }
+        } catch (error) {
+          // Handle any errors that occurred during the backend calls
+          return { error: "Backend error: " + (error instanceof Error ? error.message : "Unknown error") };
+              }
     } else {
       // Return an error for blank password
       return { error: "Password cannot be blank" };
@@ -272,11 +290,6 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
   }
 }
 
-  // Assuming the backend returns a JSON object with an 'adminInfo' property
-  const result = await response.json();
-
-  return result.adminInfo; // Replace with actual property based on your backend response
-}
 
   // old function for checking username
   function checkUserName(userName: string): boolean {
