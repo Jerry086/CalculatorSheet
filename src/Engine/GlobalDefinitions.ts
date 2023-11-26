@@ -58,3 +58,14 @@ export interface MessagesContainer {
   messages: MessageContainer[];
   paginationToken: string;
 }
+
+// user container
+export interface UserContainer {
+  user: string;
+  isAdmin: boolean;
+  group: number;
+}
+
+export interface UsersContainer {
+  users: UserContainer[];
+}
