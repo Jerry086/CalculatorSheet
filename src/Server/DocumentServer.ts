@@ -170,11 +170,13 @@ app.put("/documents/:name", (req: express.Request, res: express.Response) => {
   res.status(200).send(document);
 });
 
+// reset all documents, this is for testing
 app.post("/documents/reset", (req: express.Request, res: express.Response) => {
   documentHolder.reset();
   res.status(200).send("reset");
 });
 
+// create a document
 app.post(
   "/documents/create/:name",
   (req: express.Request, res: express.Response) => {
@@ -212,6 +214,10 @@ app.put(
     const cell = req.body.cell;
     if (!userName) {
       res.status(400).send("userName is required");
+      return;
+    }
+    if (!cell) {
+      res.status(400).send("cell label is required");
       return;
     }
     // request access to the cell

@@ -122,6 +122,12 @@ export class SpreadSheetController {
     // make them a viewer of this cell
     userData!.cellLabel = cellLabel;
 
+    // if the spreadsheet is locked then we cannot edit
+    if (this._lockedSheetUsers.includes(user)) {
+      this._errorMessage = `You do not have edit access to this sheet`;
+      return false;
+    }
+
     // if the cell is not being edited then we can edit it
     if (!this._cellsBeingEdited.has(cellLabel)) {
       userData!.isEditing = true;
