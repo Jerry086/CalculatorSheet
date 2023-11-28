@@ -197,6 +197,7 @@ app.post(
   }
 );
 
+// request to edit a cell
 app.put(
   "/document/cell/edit/:name",
   (req: express.Request, res: express.Response) => {
@@ -228,6 +229,7 @@ app.put(
   }
 );
 
+// request to view a cell
 app.put(
   "/document/cell/view/:name",
   (req: express.Request, res: express.Response) => {
@@ -246,15 +248,20 @@ app.put(
       res.status(400).send("userName is required");
       return;
     }
+    if (!cell) {
+      res.status(400).send("cell label is required");
+      return;
+    }
     // request access to the cell
     const result = documentHolder.requestViewAccess(name, cell, userName);
-
     const documentJSON = documentHolder.getDocumentJSON(name, userName);
 
     res.status(200).send(documentJSON);
   }
 );
 
+// add a token to a spreadsheet cell
+// TODO: controlled by user.isEditing, set it to false after locking
 app.put(
   "/document/addtoken/:name",
   (req: express.Request, res: express.Response) => {
@@ -272,13 +279,18 @@ app.put(
       res.status(400).send("userName is required");
       return;
     }
-    // add the
+    if (!token) {
+      res.status(400).send("token is required");
+      return;
+    }
+    // add the token
     const resultJSON = documentHolder.addToken(name, token, userName);
 
     res.status(200).send(resultJSON);
   }
 );
 
+// add a cell reference to a spreadsheet cell
 app.put(
   "/document/addcell/:name",
   (req: express.Request, res: express.Response) => {
@@ -297,6 +309,10 @@ app.put(
       res.status(400).send("userName is required");
       return;
     }
+    if (!cell) {
+      res.status(400).send("cell reference is required");
+      return;
+    }
     // add the token
     const resultJSON = documentHolder.addCell(name, cell, userName);
 
@@ -304,6 +320,7 @@ app.put(
   }
 );
 
+// remove a token from a spreadsheet cell
 app.put(
   "/document/removetoken/:name",
   (req: express.Request, res: express.Response) => {
@@ -327,7 +344,7 @@ app.put(
   }
 );
 
-// PUT /document/clear/formula/:name
+// clear the formula from a spreadsheet cell
 app.put(
   "/document/clear/formula/:name",
   (req: express.Request, res: express.Response) => {

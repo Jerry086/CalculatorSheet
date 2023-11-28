@@ -178,6 +178,7 @@ export class SpreadSheetController {
     // is the user editing a cell
     const userData = this._contributingUsers.get(user)!;
     if (!userData.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
@@ -210,6 +211,7 @@ export class SpreadSheetController {
 
     // If the user is not editing then we are done
     if (!userEditing!.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
@@ -249,6 +251,7 @@ export class SpreadSheetController {
     const userEditing = this._contributingUsers.get(user);
 
     if (!userEditing!.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
@@ -270,6 +273,7 @@ export class SpreadSheetController {
   clearFormula(user: string): void {
     const userEditing = this._contributingUsers.get(user);
     if (!userEditing || !userEditing!.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
