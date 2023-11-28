@@ -138,13 +138,13 @@ app.put("/users/assign", (req: express.Request, res: express.Response) => {
 /**
  * Document Server
  */
-// GET /documents
+// get a list of document names
 app.get("/documents", (req: express.Request, res: express.Response) => {
   const documentNames = documentHolder.getDocumentNames();
   res.send(documentNames);
 });
 
-// PUT /documents/:name
+// add a user to a document for viewing
 // userName is in the document body
 app.put("/documents/:name", (req: express.Request, res: express.Response) => {
   const name = req.params.name;

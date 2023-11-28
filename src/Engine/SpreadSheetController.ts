@@ -48,6 +48,9 @@ export class SpreadSheetController {
   // a per access error message
   private _errorMessage: string = "";
 
+  // users who are locked out of the sheet
+  private _lockedSheetUsers: string[] = [];
+
   /**
    * The components that the SpreadSheetEngine uses to manage the sheet
    *
@@ -335,6 +338,7 @@ export class SpreadSheetController {
     let container = this._memory.sheetContainer();
 
     // if the user is not a contributing user we request view access to A1
+    // this also add user as a contributing user
     if (!this._contributingUsers.has(user)) {
       this.requestViewAccess(user, "A1");
     }
@@ -344,6 +348,7 @@ export class SpreadSheetController {
     container.formula = this.getFormulaStringForUser(user);
     container.result = this.getResultStringForUser(user);
     container.isEditing = userData.isEditing;
+    container.lockedSheetUsers = this._lockedSheetUsers;
 
     // add the error message if there is one
     container.errorMessage = this._errorMessage;

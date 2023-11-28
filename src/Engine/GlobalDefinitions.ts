@@ -44,7 +44,7 @@ export interface DocumentTransport {
   contributingUsers: UserEditing[];
   errorMessage: string;
   // locked users
-  // lockedSheetUsers: string[];
+  lockedSheetUsers: string[];
 }
 
 // message container
