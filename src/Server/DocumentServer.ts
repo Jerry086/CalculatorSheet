@@ -44,12 +44,6 @@ if (!debug) {
 
 const app = express();
 app.use(cors());
-// app.use((req, res, next) => {
-//     res.setHeader('Access-Control-Allow-Origin', 'http://pencil.local:3000');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-//     next();
-// });
 app.use(bodyParser.json());
 
 // Add a middleware function to log incoming requests
@@ -60,17 +54,90 @@ app.use((req, res, next) => {
   next();
 });
 
-// initialize the engine
-const documentHolder = new DocumentHolder();
-const database = new Database();
-const userController = new UserController();
-
 // test the server
 app.get("/ping", (req, res) => {
   console.log("ping");
   return res.json({ message: "pong" });
 });
 
+// toggle debug
+app.get("/debug", (req: express.Request, res: express.Response) => {
+  debug = !debug;
+  console.log(`debug is ${debug}`);
+  res.status(200).send(`debug is ${debug}`);
+});
+
+// initialize the engine
+const documentHolder = new DocumentHolder();
+const database = new Database();
+const userController = new UserController();
+
+/**
+ * User Server
+ */
+// get user list
+app.get("/users", (req: express.Request, res: express.Response) => {
+  const users = userController.getAllUsers();
+  res.send(users);
+});
+
+// add an active user
+app.put("/users/:name", (req: express.Request, res: express.Response) => {
+  console.log("PUT /users/:name");
+  const name = req.params.name;
+  if (!name) {
+    res.status(400).send("userName is required");
+    return;
+  }
+  userController.addUser(name);
+  const users = userController.getAllUsers();
+
+  res.status(200).send(users);
+});
+
+// promote a user to admin
+app.put("/users/promote", (req: express.Request, res: express.Response) => {
+  const userName = req.body.userName;
+  if (!userName) {
+    res.status(400).send("userName is required");
+    return;
+  }
+  const password = req.body.password;
+  if (!password) {
+    res.status(400).send("password is required");
+    return;
+  }
+
+  console.log(`promote ${userName} with password ${password}`);
+
+  const result = userController.promoteUser(userName, password);
+  const users = userController.getAllUsers();
+  res.status(200).send(users);
+});
+
+// assign a user to a group
+app.put("/users/assign", (req: express.Request, res: express.Response) => {
+  const userName = req.body.userName;
+  if (!userName) {
+    res.status(400).send("userName is required");
+    return;
+  }
+  const groupName = req.body.groupName;
+  if (!groupName) {
+    res.status(400).send("groupName is required");
+    return;
+  }
+
+  console.log(`assign ${userName} to group ${groupName}`);
+
+  const result = userController.assignGroup(userName, groupName);
+  const users = userController.getAllUsers();
+  res.status(200).send(users);
+});
+
+/**
+ * Document Server
+ */
 // GET /documents
 app.get("/documents", (req: express.Request, res: express.Response) => {
   const documentNames = documentHolder.getDocumentNames();
@@ -101,12 +168,6 @@ app.put("/documents/:name", (req: express.Request, res: express.Response) => {
   const document = documentHolder.getDocumentJSON(name, userName);
 
   res.status(200).send(document);
-});
-
-app.get("/debug", (req: express.Request, res: express.Response) => {
-  debug = !debug;
-  console.log(`debug is ${debug}`);
-  res.status(200).send(`debug is ${debug}`);
 });
 
 app.post("/documents/reset", (req: express.Request, res: express.Response) => {
