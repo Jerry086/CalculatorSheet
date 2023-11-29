@@ -13,6 +13,7 @@ describe("Database", () => {
 
   test("addMessage", () => {
     let db = new Database();
+    db.reset();
     const messageText = "Hello, world!";
     db.addMessage(userJose, messageText);
     const messages = db.getMessages("");
@@ -23,6 +24,7 @@ describe("Database", () => {
 
   test("getMessages 10", () => {
     let db = new Database();
+    db.reset();
     for (let i = 0; i < 10; i++) {
       db.addMessage(userJose, `Message ${i}`);
     }
@@ -35,6 +37,7 @@ describe("Database", () => {
 
   test("getAllMessages", () => {
     let db = new Database();
+    db.reset();
     for (let i = 0; i < 10; i++) {
       db.addMessage(userJose, `Message ${i}`);
       console.log(`Message ${i}`);
@@ -47,6 +50,7 @@ describe("Database", () => {
 
   test("getMessages 25", () => {
     let db = new Database();
+    db.reset();
     for (let i = 0; i < 25; i++) {
       db.addMessage(userJose, `Message ${i}`);
     }
@@ -62,6 +66,7 @@ describe("Database", () => {
   });
   test("getMessages 30", () => {
     let db = new Database();
+    db.reset();
     for (let i = 0; i < 30; i++) {
       db.addMessage(userJose, `Message ${i}`);
     }
@@ -78,6 +83,7 @@ describe("Database", () => {
 
   test("getMessages 45", () => {
     let db = new Database();
+    db.reset();
     for (let i = 0; i < 45; i++) {
       db.addMessage(userJose, `Message ${i}`);
     }
@@ -98,6 +104,7 @@ describe("Database", () => {
 
   test("getMessages 45 +1", () => {
     let db = new Database();
+    db.reset();
     for (let i = 0; i < 45; i++) {
       db.addMessage(userJose, `Message ${i}`);
     }

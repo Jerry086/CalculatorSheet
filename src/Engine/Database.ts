@@ -78,7 +78,6 @@ class Message implements MessageContainer {
       timestamp: this.timestamp.toISOString(),
     };
   }
-
 }
 
 class Database {
@@ -91,7 +90,15 @@ class Database {
    */
   private messages: Message[] = [];
   private messageCount: number = 0;
-  private filePath: string = path.join(__dirname, "..", "..", 'chathistory', 'database.json');
+  private lockedChatUsers: string[] = [];
+  private error: string = "";
+  private filePath: string = path.join(
+    __dirname,
+    "..",
+    "..",
+    "chathistory",
+    "database.json"
+  );
 
   /**
    * Creates an instance of Database.
@@ -100,6 +107,8 @@ class Database {
   constructor() {
     this.messages = [];
     this.messageCount = 0;
+    this.lockedChatUsers = [];
+    this.error = "";
     // Load database from file if it exists
     this.loadDatabaseFile();
   }
@@ -107,53 +116,58 @@ class Database {
   reset() {
     this.messages = [];
     this.messageCount = 0;
+    this.lockedChatUsers = [];
+    this.error = "";
   }
-
-  
 
   /**
    * Save the database to a json file.
    * @memberof Database
-   * 
+   *
    */
   saveDatabaseFile() {
-    const data = JSON.stringify(this.messages.map(message => message.toJSON()), null, 2);
-    
+    const data = JSON.stringify(
+      this.messages.map((message) => message.toJSON()),
+      null,
+      2
+    );
+
     try {
-      const directoryPath = path.join(__dirname, 'chathistory');
+      const directoryPath = path.join(__dirname, "chathistory");
       if (!fs.existsSync(directoryPath)) {
-          fs.mkdirSync(directoryPath);
+        fs.mkdirSync(directoryPath);
       }
 
       fs.writeFileSync(this.filePath, data);
-      console.log('Database saved successfully.');
+      console.log("Database saved successfully.");
     } catch (error) {
-      console.error('Error saving database:', error);
+      console.error("Error saving database:", error);
     }
   }
 
   /**
    * Load the database from a json file.
    * @memberof Database
-   * 
+   *
    */
   loadDatabaseFile() {
     try {
-      const data = fs.readFileSync(this.filePath, 'utf-8');
+      const data = fs.readFileSync(this.filePath, "utf-8");
       const jsonMessages = JSON.parse(data);
 
-      this.messages = jsonMessages.map((jsonMessage: any) => Message.fromJSON(jsonMessage));
+      this.messages = jsonMessages.map((jsonMessage: any) =>
+        Message.fromJSON(jsonMessage)
+      );
       this.messageCount = this.messages.length;
 
-      console.log('Database loaded successfully.');
+      console.log("Database loaded successfully.");
     } catch (error: any) {
       // If the file does not exist, ignore the error (first run or file got deleted)
-      if (error.code !== 'ENOENT') {
-        console.error('Error loading database:', error);
+      if (error.code !== "ENOENT") {
+        console.error("Error loading database:", error);
       }
     }
   }
-
 
   /**
    * Add a message to the database
@@ -162,6 +176,11 @@ class Database {
    * @memberof Database
    */
   addMessage(user: string, message: string) {
+    // send error if user is locked
+    if (this.lockedChatUsers.includes(user)) {
+      this.error = `${user} does not have permission to send messages`;
+      return;
+    }
     // prepend the message to the array
     this.messages.unshift(new Message(message, user, this.messageCount++));
     // save the database to a file
@@ -174,6 +193,8 @@ class Database {
     const result: MessagesContainer = {
       messages: this.messages,
       paginationToken: "__TEST_DISABLE_IN_PRODUCTION__",
+      error: this.error,
+      lockedChatUsers: this.lockedChatUsers,
     };
 
     return result;
@@ -186,25 +207,27 @@ class Database {
    * @memberof Database
    */
   getMessages(pagingToken: string): MessagesContainer {
+    let result: MessagesContainer = {
+      messages: [],
+      paginationToken: "",
+      error: this.error,
+      lockedChatUsers: this.lockedChatUsers,
+    };
+    this.error = "";
     // if paging token is "__END__" then send empty array and "__END__"
     if (pagingToken === "__END__") {
-      return {
-        messages: [],
-        paginationToken: "__END__",
-      };
+      result.paginationToken = "__END__";
+      return result;
     }
 
     // if less than paging size then send message and "__END__"
     if (this.messages.length <= 20 && pagingToken === "") {
-      const result: MessagesContainer = {
-        messages: this.messages,
-        paginationToken: "__END__",
-      };
+      result.messages = this.messages;
+      result.paginationToken = "__END__";
       return result;
     }
 
     if (pagingToken === "") {
-      //
       // generate Unique ID for this user that contains the message id of the next message to be sent
       // get the ten messages to send (the last ones)
       const messagesToSend = this.messages.slice(0, 20);
@@ -214,10 +237,8 @@ class Database {
       const paginationToken = `__${nextMessageId
         .toString()
         .padStart(10, "0")}__`;
-      const result: MessagesContainer = {
-        messages: messagesToSend,
-        paginationToken: paginationToken,
-      };
+      result.messages = messagesToSend;
+      result.paginationToken = paginationToken;
       return result;
     }
 
@@ -231,43 +252,104 @@ class Database {
     );
     // if the next message is not found, then return empty array and "__END__"
     if (nextMessageIndex === -1) {
-      return {
-        messages: [],
-        paginationToken: "__END__",
-      };
+      result.paginationToken = "__END__";
+      result.error = `Message with id ${nextMessageId} not found`;
+      return result;
     }
 
     // At this point we know we have some messages to send.
-
+    // Does it include the last message, if so then send "__END__" as the token
     const messagesToSend = this.messages.slice(
       nextMessageIndex,
       nextMessageIndex + 20
     );
-    if (messagesToSend.length < 20) {
-      return {
-        messages: messagesToSend,
-        paginationToken: "__END__",
-      };
-    }
-
-    // so there were 20 messages to send.
-    // Are these 20 the last 20, if so then send "__END__" as the token
     if (nextMessageIndex + 20 >= this.messages.length) {
-      return {
-        messages: messagesToSend,
-        paginationToken: "__END__",
-      };
+      result.messages = messagesToSend;
+      result.paginationToken = "__END__";
+      return result;
     }
 
     nextMessageId = this.messages[nextMessageIndex + 20].id;
     // generate Unique ID for this user that contains the message id of the next message to be sent
     let paginationToken = `__${nextMessageId.toString().padStart(10, "0")}__`;
-    const result: MessagesContainer = {
-      messages: messagesToSend,
-      paginationToken: paginationToken,
-    };
+    result.messages = messagesToSend;
+    result.paginationToken = paginationToken;
     return result;
   }
-}
 
+  /**
+   * Lock a user from sending messages
+   *
+   * @param {string} user
+   * @memberof Database
+   */
+  lockUser(user: string) {
+    // find if the user is already locked
+    const index = this.lockedChatUsers.findIndex((u) => u === user);
+    if (index === -1) {
+      // add the user
+      this.lockedChatUsers.push(user);
+      console.log("locked user,", user);
+    }
+  }
+
+  /**
+   * locks a collection of users from sending messages
+   * @param {string[]} users
+   * @memberof Database
+   * */
+  lockUsers(users: string[]) {
+    users.forEach((user) => {
+      // find if the user is already locked
+      const index = this.lockedChatUsers.findIndex((u) => u === user);
+      if (index === -1) {
+        // add the user
+        this.lockedChatUsers.push(user);
+        console.log("locked user,", user);
+      }
+    });
+  }
+
+  /**
+   * Unlock a user from sending messages
+   *
+   * @param {string} user
+   * @memberof Database
+   */
+  unlockUser(user: string) {
+    // find if the user is already locked
+    const index = this.lockedChatUsers.findIndex((u) => u === user);
+    if (index !== -1) {
+      // remove the user
+      this.lockedChatUsers.splice(index, 1);
+      console.log("unlocked user,", user);
+    }
+  }
+
+  /**
+   * unlocks a collection of users from sending messages
+   * @param {string[]} users
+   * @memberof Database
+   * */
+  unlockUsers(users: string[]) {
+    users.forEach((user) => {
+      // find if the user is already locked
+      const index = this.lockedChatUsers.findIndex((u) => u === user);
+      if (index !== -1) {
+        // remove the user
+        this.lockedChatUsers.splice(index, 1);
+        console.log("unlocked user,", user);
+      }
+    });
+  }
+
+  /**
+   * unlock all users from sending messages
+   * @memberof Database
+   * */
+  unlockAllUsers() {
+    this.lockedChatUsers = [];
+    console.log("unlocked all users");
+  }
+}
 export { Database, Message };

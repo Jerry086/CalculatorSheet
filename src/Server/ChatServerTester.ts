@@ -35,8 +35,12 @@ async function resetTestData() {
 }
 
 async function sendTestMessage(message: string, user: string) {
-  const url = `${baseURL}/message/${user}/${message}`;
-  return await axios.get(url);
+  const body = {
+    message: message,
+    user: user,
+  };
+  const url = `${baseURL}/message`;
+  return await axios.post(url, body);
 }
 
 async function getMessages(pagingToken: string) {

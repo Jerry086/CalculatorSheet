@@ -48,6 +48,9 @@ export class SpreadSheetController {
   // a per access error message
   private _errorMessage: string = "";
 
+  // users who are locked out of the sheet
+  private _lockedSheetUsers: string[] = [];
+
   /**
    * The components that the SpreadSheetEngine uses to manage the sheet
    *
@@ -91,7 +94,6 @@ export class SpreadSheetController {
     }
 
     this.releaseEditAccess(user);
-    userData.isEditing = false;
     this._contributingUsers.set(user, userData);
     userData.formulaBuilder.setFormula(
       this._memory.getCellByLabel(cellLabel).getFormula()
@@ -119,6 +121,12 @@ export class SpreadSheetController {
     // make them a viewer of this cell
     userData!.cellLabel = cellLabel;
 
+    // if the spreadsheet is locked then we cannot edit
+    if (this._lockedSheetUsers.includes(user)) {
+      this._errorMessage = `You do not have edit access to this sheet`;
+      return false;
+    }
+
     // if the cell is not being edited then we can edit it
     if (!this._cellsBeingEdited.has(cellLabel)) {
       userData!.isEditing = true;
@@ -139,21 +147,55 @@ export class SpreadSheetController {
   }
 
   releaseEditAccess(user: string): void {
-    // if the user is not editing a cell then we are done
-    if (!this._contributingUsers.get(user)?.isEditing) {
+    const userData = this._contributingUsers.get(user);
+    // if the user is not a contributing user then we are done
+    if (!userData) {
       return;
     }
-
-    const editingCell: string | undefined =
-      this._contributingUsers.get(user)?.cellLabel;
-    if (editingCell) {
-      if (this._cellsBeingEdited.has(editingCell)) {
-        this._cellsBeingEdited.delete(editingCell);
-      }
+    // if the user is not editing a cell then we are done
+    if (!userData.isEditing) {
+      return;
     }
+    userData.isEditing = false;
 
+    const editingCell: string = userData.cellLabel;
+    if (this._cellsBeingEdited.has(editingCell)) {
+      this._cellsBeingEdited.delete(editingCell);
+    }
     // // remove the user from the list of users
     // this._contributingUsers.delete(user);
+  }
+
+  /**
+   * lock the users out of the sheet
+   */
+  lockUsers(users: string[]): void {
+    users.forEach((user) => {
+      // if the user is editing a cell then release the edit
+      if (this._contributingUsers.get(user)?.isEditing) {
+        this.releaseEditAccess(user);
+      }
+      // add the user to the locked list if they are not already there
+      if (!this._lockedSheetUsers.includes(user)) {
+        this._lockedSheetUsers.push(user);
+      }
+    });
+  }
+
+  /**
+   * unlock a user out of the sheet
+   * */
+  unlockUser(user: string): void {
+    // remove the user from the locked list if they are there
+    if (this._lockedSheetUsers.includes(user)) {
+      this._lockedSheetUsers.splice(this._lockedSheetUsers.indexOf(user), 1);
+    }
+  }
+  /**
+   * unlock all users out of the sheet
+   * */
+  unlockAllUsers(): void {
+    this._lockedSheetUsers = [];
   }
 
   /**
@@ -169,6 +211,7 @@ export class SpreadSheetController {
     // is the user editing a cell
     const userData = this._contributingUsers.get(user)!;
     if (!userData.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
@@ -201,6 +244,7 @@ export class SpreadSheetController {
 
     // If the user is not editing then we are done
     if (!userEditing!.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
@@ -240,6 +284,7 @@ export class SpreadSheetController {
     const userEditing = this._contributingUsers.get(user);
 
     if (!userEditing!.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
@@ -261,6 +306,7 @@ export class SpreadSheetController {
   clearFormula(user: string): void {
     const userEditing = this._contributingUsers.get(user);
     if (!userEditing || !userEditing!.isEditing) {
+      this._errorMessage = `User ${user} is not editing a cell`;
       return;
     }
 
@@ -335,6 +381,7 @@ export class SpreadSheetController {
     let container = this._memory.sheetContainer();
 
     // if the user is not a contributing user we request view access to A1
+    // this also add user as a contributing user
     if (!this._contributingUsers.has(user)) {
       this.requestViewAccess(user, "A1");
     }
@@ -344,6 +391,7 @@ export class SpreadSheetController {
     container.formula = this.getFormulaStringForUser(user);
     container.result = this.getResultStringForUser(user);
     container.isEditing = userData.isEditing;
+    container.lockedSheetUsers = this._lockedSheetUsers;
 
     // add the error message if there is one
     container.errorMessage = this._errorMessage;
