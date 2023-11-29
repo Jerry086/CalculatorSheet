@@ -398,9 +398,30 @@ app.put(
     const nonAdminUsers = userController.getNonAdminUsers();
     documentHolder.lockUsers(name, nonAdminUsers);
 
-    res.status(200).send("locked");
+    res.status(200).send(`Document ${name} locked`);
   }
 );
+
+// lock all documents
+app.put("/documents/lockall", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    res.status(400).send("admin is required");
+    return;
+  }
+  if (!userController.isAdmin(admin)) {
+    res.status(400).send("You are not an admin");
+    return;
+  }
+  // lock all users
+  const nonAdminUsers = userController.getNonAdminUsers();
+  const documents = documentHolder.getDocumentNames();
+  documents.forEach((document) => {
+    documentHolder.lockUsers(document, nonAdminUsers);
+  });
+
+  res.status(200).send("All documents locked");
+});
 
 /**
  * Chat Server
