@@ -266,7 +266,7 @@ interface SheetsDataType {
    */
   function onCellClick(event: React.MouseEvent<HTMLButtonElement>): void {
 
-    if(checkPerms()){
+    if(!checkPerms()){
       alert( "Sheet is locked")
     }
 
