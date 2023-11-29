@@ -290,6 +290,34 @@ Button was moved to bottom of page so that it was not in the header/title - whic
 Upon manual testing button works as expected and fits page theme.
 
 
-# Bug 6 Long user name overflow the cell
-The bug is fixed by limiting user name's length to 1 - 12 characters and only consists of alphanumeric characters.
+# Bug 6. Long user name overlap with the cell value
+## User Story
+
+As a user, I expect the user name in each cell to be fully visible without overlapping with the cell's value.
+
+Issue with system based on the stated user story:
+The bug caused the user name to be too long, resulting in it not being fully visible within the cell, and overlapping with the cell's value.
+
+Repo steps:
+
+1. Open the application and navigate to the section where user names are displayed within cells.
+2. Identify a user with a long user name that would potentially cause the issue.
+3. Observe that the user name is not fully visible within the cell, and it overlaps with the cell's value.
+4. Attempt to edit the user name or perform any relevant actions to trigger the bug.
+5. Verify that the user name and cell value overlap persists, making it difficult to read the entire user name.
+
+## Details
+The bug is fixed by limiting the user name's length to 1 - 12 characters and only consists of alphanumeric characters.
+
 ## Fix status: Fixed
+
+
+# Bug 7 Can access url without login
+
+##  Ticket
+
+Users can access spreadsheet pages directly via url without setting a username. Spreadsheet page should redirect users to login page if username is not set.
+
+## User Story
+
+As a user I should not be able to access the spreadsheet page without being logged in/having a username. Even though the lack of a password system means this is not a security issue right now - it can still mean I'm unable to change things yet don't see a way to login on the page itself.

@@ -1,0 +1,13 @@
+.notLeft{
+    /* border: solid black 0.5px; */
+    border-bottom: dotted black 0.5px;
+    margin-left: 10px;
+    margin-right: 100px;
+    padding-left: 100px;
+    overflow-x: auto;
+}
+
+.left{
+
+    border-right: dotted black 0.5px;
+}

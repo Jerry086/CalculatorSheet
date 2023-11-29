@@ -72,11 +72,12 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const originalValue = e.target.value;
 
-      // Check if the input is empty and not just a sequence of whitespaces
-    if (originalValue.trim() === "") {
-      alert("Input cannot be empty.");
-      return;
-    }
+    // Check moved to send message function.
+    // Check if the input is empty and not just a sequence of whitespaces
+    // if (originalValue.trim() === "") {
+    //   alert("Input cannot be empty.");
+    //   return;
+    // }
     
     const regex = /[^a-z0-9.,!?\\/\-_()\s=+*&^%$#@!~:;<>'"{[\]}]/gi; // Matches characters NOT in the set
     const newValue = originalValue.replace(regex, '');
@@ -93,8 +94,9 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
 
 
   const handleSendMessage = () => {
-    if (inputValue.length < 1) {
-      alert("Input cannot be empty.");
+    if (inputValue.trim() === "") {
+      console.log("Error: message cannot be empty");
+      alert("Error: Input cannot be empty.");
     } else {
       // chatClient.sendMessage(inputValue, userName);
       chatClient.sendMessagePost(inputValue, userName);

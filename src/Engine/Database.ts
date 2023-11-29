@@ -4,6 +4,8 @@
  * @class Database
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import { MessagesContainer, MessageContainer } from "./GlobalDefinitions";
 
 class Message implements MessageContainer {
@@ -51,6 +53,31 @@ class Message implements MessageContainer {
     this.timestamp = new Date();
     this.id = id;
   }
+
+  /**
+   * Creates a Message instance from a JSON object.
+   * @static
+   * @param {any} json - The JSON object representing the message.
+   * @returns {Message} - The instance created from the JSON object.
+   */
+  static fromJSON(json: any): Message {
+    const message = new Message(json.message, json.user, json.id);
+    // Restore timestamp from ISO string
+    message.timestamp = new Date(json.timestamp);
+    return message;
+  }
+  /**
+   * Convers the Message instance to a JSON object.
+   * @returns {any} - The JSON object representing the message.
+   */
+  toJSON(): any {
+    return {
+      message: this.message,
+      user: this.user,
+      id: this.id,
+      timestamp: this.timestamp.toISOString(),
+    };
+  }
 }
 
 class Database {
@@ -65,6 +92,13 @@ class Database {
   private messageCount: number = 0;
   private lockedChatUsers: string[] = [];
   private error: string = "";
+  private filePath: string = path.join(
+    __dirname,
+    "..",
+    "..",
+    "chathistory",
+    "database.json"
+  );
 
   /**
    * Creates an instance of Database.
@@ -75,6 +109,8 @@ class Database {
     this.messageCount = 0;
     this.lockedChatUsers = [];
     this.error = "";
+    // Load database from file if it exists
+    this.loadDatabaseFile();
   }
 
   reset() {
@@ -82,6 +118,55 @@ class Database {
     this.messageCount = 0;
     this.lockedChatUsers = [];
     this.error = "";
+  }
+
+  /**
+   * Save the database to a json file.
+   * @memberof Database
+   *
+   */
+  saveDatabaseFile() {
+    const data = JSON.stringify(
+      this.messages.map((message) => message.toJSON()),
+      null,
+      2
+    );
+
+    try {
+      const directoryPath = path.join(__dirname, "chathistory");
+      if (!fs.existsSync(directoryPath)) {
+        fs.mkdirSync(directoryPath);
+      }
+
+      fs.writeFileSync(this.filePath, data);
+      console.log("Database saved successfully.");
+    } catch (error) {
+      console.error("Error saving database:", error);
+    }
+  }
+
+  /**
+   * Load the database from a json file.
+   * @memberof Database
+   *
+   */
+  loadDatabaseFile() {
+    try {
+      const data = fs.readFileSync(this.filePath, "utf-8");
+      const jsonMessages = JSON.parse(data);
+
+      this.messages = jsonMessages.map((jsonMessage: any) =>
+        Message.fromJSON(jsonMessage)
+      );
+      this.messageCount = this.messages.length;
+
+      console.log("Database loaded successfully.");
+    } catch (error: any) {
+      // If the file does not exist, ignore the error (first run or file got deleted)
+      if (error.code !== "ENOENT") {
+        console.error("Error loading database:", error);
+      }
+    }
   }
 
   /**
@@ -98,6 +183,8 @@ class Database {
     }
     // prepend the message to the array
     this.messages.unshift(new Message(message, user, this.messageCount++));
+    // save the database to a file
+    this.saveDatabaseFile();
     console.log("added message,", message);
   }
 
