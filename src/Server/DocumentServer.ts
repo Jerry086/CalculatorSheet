@@ -413,6 +413,28 @@ app.get("/messages/getall", (req, res) => {
   return res.json(result);
 });
 
+// this locks a user from sending messages
+app.put("/messages/lock", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  const user = req.body.user;
+  if (!user) {
+    return res.status(400).send("user is required");
+  }
+  if (userController.isAdmin(user)) {
+    return res.status(400).send("You cannot lock an admin");
+  }
+  console.log(`put /messages/lock/${user}`);
+  database.lockUser(user);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
 // get the port we should be using
 const port = PortsGlobal.serverPort;
 // start the app and test it

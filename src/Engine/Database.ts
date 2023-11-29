@@ -276,6 +276,22 @@ class Database {
     result.paginationToken = paginationToken;
     return result;
   }
+
+  /**
+   * Lock a user from sending messages
+   *
+   * @param {string} user
+   * @memberof Database
+   */
+  lockUser(user: string) {
+    // find if the user is already locked
+    const index = this.lockedChatUsers.findIndex((u) => u === user);
+    if (index === -1) {
+      // add the user
+      this.lockedChatUsers.push(user);
+      console.log("locked user,", user);
+    }
+  }
 }
 
 export { Database, Message };
