@@ -393,11 +393,9 @@ app.post("/message", (req, res) => {
   return res.json(result);
 });
 
-// GET /messages/get/:pagingToken?
 // this gets messages from the database starting at the pagingToken
 app.get("/messages/get/:pagingToken?", (req, res) => {
   // if there is no :pagingToken, then it will be an empty string
-
   let pagingToken = req.params.pagingToken || "";
   if (pagingToken) {
     console.log(`get /messages/get/${pagingToken}`);
@@ -407,7 +405,6 @@ app.get("/messages/get/:pagingToken?", (req, res) => {
   return res.json(result);
 });
 
-// GET /messages/getall
 // this gets all the messages from the database, used for debugging
 // this is not used in the production mode
 app.get("/messages/getall", (req, res) => {
