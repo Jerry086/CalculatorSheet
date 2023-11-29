@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
-import { SHA256 } from 'crypto-js';
 import bcrypt from 'bcryptjs';
 
 /**
@@ -150,6 +149,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
       }
   
       const loginResponse = dummyLoginCall(userName);
+      // const loginResponse = loginCall(userName); change to this when backend is ready
       // TODO
   
       if ('error' in loginResponse) {
@@ -159,15 +159,19 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   
       window.sessionStorage.setItem('userName', loginResponse.username);
       window.sessionStorage.setItem('isAdmin', loginResponse.isAdmin.toString());
+      /*
       if (loginResponse.isAdmin && loginResponse.isAdminKey) {
         window.sessionStorage.setItem('isAdminKey', loginResponse.isAdminKey!);
       }
+      */
   
       setUserName(loginResponse.username);
       setIsAdmin(loginResponse.isAdmin);
+      /*
       if (loginResponse.isAdminKey) {
         setIsAdminKey(loginResponse.isAdminKey);
       }
+      */
       spreadSheetClient.userName = loginResponse.username;
     }
   }
@@ -218,22 +222,6 @@ async function backendCheckPassword(encryptedPassword: string): Promise<boolean>
   return result.isPasswordCorrect; // Replace with actual property based on your backend response
 }
 
-// Function to get admin info from the backend
-async function backendGetAdminInfo(userName: string): Promise<{ isAdminKey: string } | null> {
-  // Simulate a backend request (replace with actual fetch or axios call)
-  const response = await fetch('https://dummy-backend-url/get-admin-info', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ userName }),
-  });
-  // Assuming the backend returns a JSON object with an 'isAdminKey' property
-  const result = await response.json();
-
-  return result.isAdminKey ? { isAdminKey: result.isAdminKey } : null;
-}
-
 async function hashPassword(password: string) {
   const saltRounds = 10;
 
@@ -262,16 +250,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
           const isPasswordCorrect = await backendCheckPassword(encryptedPassword);
 
           if (isPasswordCorrect) {
-            // Get admin info from backend
-            const adminInfo = await backendGetAdminInfo(userName);
-
-            if (adminInfo) {
-              // Return the authenticated admin response
-              return { username: "Admin", isAdmin: true, isAdminKey: adminInfo.isAdminKey };
-            } else {
-              // Return an error if unable to retrieve admin info
-              return { error: "Unable to retrieve admin info" };
-            }
+            return { username: "Admin", isAdmin: true };
           } else {
             // Return an error for wrong password
             return { error: "Wrong password" };
@@ -286,7 +265,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
     }
   } else {
     // Return response for non-admin user
-    return { username: userName, isAdmin: false, isAdminKey: "" };
+    return { username: userName, isAdmin: false};
   }
 }
 
