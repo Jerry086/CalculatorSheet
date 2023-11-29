@@ -63,6 +63,8 @@ class Database {
    */
   private messages: Message[] = [];
   private messageCount: number = 0;
+  private lockedChatUsers: string[] = [];
+  private error: string = "";
 
   /**
    * Creates an instance of Database.
@@ -71,11 +73,15 @@ class Database {
   constructor() {
     this.messages = [];
     this.messageCount = 0;
+    this.lockedChatUsers = [];
+    this.error = "";
   }
 
   reset() {
     this.messages = [];
     this.messageCount = 0;
+    this.lockedChatUsers = [];
+    this.error = "";
   }
 
   /**
@@ -85,6 +91,11 @@ class Database {
    * @memberof Database
    */
   addMessage(user: string, message: string) {
+    // send error if user is locked
+    if (this.lockedChatUsers.includes(user)) {
+      this.error = `${user} does not have permission to send messages`;
+      return;
+    }
     // prepend the message to the array
     this.messages.unshift(new Message(message, user, this.messageCount++));
     console.log("added message,", message);
@@ -95,6 +106,8 @@ class Database {
     const result: MessagesContainer = {
       messages: this.messages,
       paginationToken: "__TEST_DISABLE_IN_PRODUCTION__",
+      error: this.error,
+      lockedChatUsers: this.lockedChatUsers,
     };
 
     return result;
@@ -107,25 +120,27 @@ class Database {
    * @memberof Database
    */
   getMessages(pagingToken: string): MessagesContainer {
+    let result: MessagesContainer = {
+      messages: [],
+      paginationToken: "",
+      error: this.error,
+      lockedChatUsers: this.lockedChatUsers,
+    };
+    this.error = "";
     // if paging token is "__END__" then send empty array and "__END__"
     if (pagingToken === "__END__") {
-      return {
-        messages: [],
-        paginationToken: "__END__",
-      };
+      result.paginationToken = "__END__";
+      return result;
     }
 
     // if less than paging size then send message and "__END__"
     if (this.messages.length <= 20 && pagingToken === "") {
-      const result: MessagesContainer = {
-        messages: this.messages,
-        paginationToken: "__END__",
-      };
+      result.messages = this.messages;
+      result.paginationToken = "__END__";
       return result;
     }
 
     if (pagingToken === "") {
-      //
       // generate Unique ID for this user that contains the message id of the next message to be sent
       // get the ten messages to send (the last ones)
       const messagesToSend = this.messages.slice(0, 20);
@@ -135,10 +150,8 @@ class Database {
       const paginationToken = `__${nextMessageId
         .toString()
         .padStart(10, "0")}__`;
-      const result: MessagesContainer = {
-        messages: messagesToSend,
-        paginationToken: paginationToken,
-      };
+      result.messages = messagesToSend;
+      result.paginationToken = paginationToken;
       return result;
     }
 
@@ -152,41 +165,28 @@ class Database {
     );
     // if the next message is not found, then return empty array and "__END__"
     if (nextMessageIndex === -1) {
-      return {
-        messages: [],
-        paginationToken: "__END__",
-      };
+      result.paginationToken = "__END__";
+      result.error = `Message with id ${nextMessageId} not found`;
+      return result;
     }
 
     // At this point we know we have some messages to send.
-
+    // Does it include the last message, if so then send "__END__" as the token
     const messagesToSend = this.messages.slice(
       nextMessageIndex,
       nextMessageIndex + 20
     );
-    if (messagesToSend.length < 20) {
-      return {
-        messages: messagesToSend,
-        paginationToken: "__END__",
-      };
-    }
-
-    // so there were 20 messages to send.
-    // Are these 20 the last 20, if so then send "__END__" as the token
     if (nextMessageIndex + 20 >= this.messages.length) {
-      return {
-        messages: messagesToSend,
-        paginationToken: "__END__",
-      };
+      result.messages = messagesToSend;
+      result.paginationToken = "__END__";
+      return result;
     }
 
     nextMessageId = this.messages[nextMessageIndex + 20].id;
     // generate Unique ID for this user that contains the message id of the next message to be sent
     let paginationToken = `__${nextMessageId.toString().padStart(10, "0")}__`;
-    const result: MessagesContainer = {
-      messages: messagesToSend,
-      paginationToken: paginationToken,
-    };
+    result.messages = messagesToSend;
+    result.paginationToken = paginationToken;
     return result;
   }
 }

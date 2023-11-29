@@ -379,19 +379,14 @@ app.get("/reset", (req, res) => {
 });
 
 // this adds a message to the database
-app.get("/message/:user/:message", (req, res) => {
-  const message = req.params.message;
-  const user = req.params.user;
-  console.log(`get /message/${message}/${user}`);
-  database.addMessage(user, message);
-  const result = database.getMessages("");
-  return res.json(result);
-});
-
-// POST /message
-// this adds a message to the database
 app.post("/message", (req, res) => {
   const { message, user } = req.body;
+  if (!message) {
+    return res.status(400).send("message is required");
+  }
+  if (!user) {
+    return res.status(400).send("user is required");
+  }
   console.log(`post /message with message: ${message} and user: ${user}`);
   database.addMessage(user, message);
   const result = database.getMessages("");
