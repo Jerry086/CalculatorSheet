@@ -368,14 +368,16 @@ app.put(
   }
 );
 
-// reset the database
+/**
+ * Chat Server
+ */
+// reset the chat history
 app.get("/reset", (req, res) => {
   console.log("GET /reset");
   database.reset();
   return res.json({ message: "reset" });
 });
 
-// GET /message/:user/:message
 // this adds a message to the database
 app.get("/message/:user/:message", (req, res) => {
   const message = req.params.message;
