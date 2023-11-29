@@ -185,6 +185,11 @@ class ChatClient {
     }
     this._server = server;
   }
+
+  // Add a public method to get the _baseURL
+  public getBaseURL(): string {
+    return this._baseURL;
+  }
 }
 
 export default ChatClient;
