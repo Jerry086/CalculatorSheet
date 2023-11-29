@@ -74,6 +74,10 @@ const userController = new UserController();
 
 /**
  * User Server
+ * GET /users
+ * POST /user/:userName
+ * PUT /user/promote
+ * PUT /user/assign
  */
 // get user list
 app.get("/users", (req: express.Request, res: express.Response) => {
@@ -96,7 +100,6 @@ app.post("/user/:userName", (req: express.Request, res: express.Response) => {
 });
 
 // promote a user to admin
-// TODO: unlock the new admin from all sources
 app.put("/user/promote", (req: express.Request, res: express.Response) => {
   const userName = req.body.userName;
   if (!userName) {
@@ -146,6 +149,19 @@ app.put("/user/assign", (req: express.Request, res: express.Response) => {
 
 /**
  * Document Server
+ * GET /documents
+ * PUT /documents/:name
+ * POST /documents/create/:name
+ * PUT /document/cell/edit/:name
+ * PUT /document/cell/view/:name
+ * PUT /document/addtoken/:name
+ * PUT /document/addcell/:name
+ * PUT /document/removetoken/:name
+ * PUT /document/clear/formula/:name
+ * PUT /document/lock/:name
+ * PUT /document/unlock/:name
+ * PUT /document/lockall
+ * PUT /document/unlockall
  */
 // get a list of document names
 app.get("/documents", (req: express.Request, res: express.Response) => {
@@ -434,7 +450,7 @@ app.put(
 );
 
 // lock all documents
-app.put("/documents/lockall", (req, res) => {
+app.put("/document/lockall", (req, res) => {
   const admin = req.body.admin;
   if (!admin) {
     res.status(400).send("admin is required");
@@ -455,7 +471,7 @@ app.put("/documents/lockall", (req, res) => {
 });
 
 // unlock all documents
-app.put("/documents/unlockall", (req, res) => {
+app.put("/document/unlockall", (req, res) => {
   const admin = req.body.admin;
   if (!admin) {
     res.status(400).send("admin is required");
@@ -476,6 +492,14 @@ app.put("/documents/unlockall", (req, res) => {
 
 /**
  * Chat Server
+ * GET /reset
+ * POST /message
+ * GET /messages/get/:pagingToken?
+ * GET /messages/getall
+ * PUT /messages/lock
+ * PUT /messages/unlock
+ * PUT /messages/lockAll
+ * PUT /messages/unlockAll
  */
 // reset the chat history
 app.get("/reset", (req, res) => {
