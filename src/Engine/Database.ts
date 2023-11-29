@@ -292,6 +292,21 @@ class Database {
       console.log("locked user,", user);
     }
   }
-}
 
+  /**
+   * Unlock a user from sending messages
+   *
+   * @param {string} user
+   * @memberof Database
+   */
+  unlockUser(user: string) {
+    // find if the user is already locked
+    const index = this.lockedChatUsers.findIndex((u) => u === user);
+    if (index !== -1) {
+      // remove the user
+      this.lockedChatUsers.splice(index, 1);
+      console.log("unlocked user,", user);
+    }
+  }
+}
 export { Database, Message };

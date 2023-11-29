@@ -435,6 +435,25 @@ app.put("/messages/lock", (req, res) => {
   return res.json(result);
 });
 
+// this unlocks a user from sending messages
+app.put("/messages/unlock", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  const user = req.body.user;
+  if (!user) {
+    return res.status(400).send("user is required");
+  }
+  console.log(`put /messages/unlock/${user}`);
+  database.unlockUser(user);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
 // get the port we should be using
 const port = PortsGlobal.serverPort;
 // start the app and test it
