@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
 import bcrypt from 'bcryptjs';
+import ChatClient from '../Engine/ChatClient';
+
 
 /**
  * Login PageComponent is the component that will be used to display the login page
@@ -46,6 +48,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
 
 
+
   // SpreadSheetClient is fetching the documents from the server so we should
   // check every 1/20 of a second to see if the documents have been fetched
   useEffect(() => {
@@ -59,6 +62,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
     const sheets = spreadSheetClient.getSheets();
     const data = dummyGetSpreadSheetData(sheets);
     setSheetsData(data);
+
 
 
     return () => clearInterval(interval);
@@ -215,13 +219,16 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 // Function to check if the password is correct (replace with actual backend implementation)
 async function backendCheckPassword(userName: string, encryptedPassword: string): Promise<boolean> {
   // Simulate a backend request (replace with actual fetch or axios call)
-  const response = await fetch('/user/promote', {
+  const chatClientInstance = new ChatClient();
+  const baseUrl = chatClientInstance.getBaseURL();
+  const response = await fetch(`${baseUrl}/user/promote`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ userName, encryptedPassword }),
+    body: JSON.stringify({ userName: userName, password: encryptedPassword }),
   });
+  console.log(encryptedPassword);
 
   // Assuming the backend returns a JSON object with a 'isPasswordCorrect' property
   //const result = await response.json();
@@ -452,7 +459,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
 
   function loginPage() {
 
-    console.log("username & isadmin are ");
+    //console.log("username & isadmin are ");
     userName && console.log(userName);
     isAdmin && console.log(isAdmin);
 
