@@ -82,21 +82,21 @@ app.get("/users", (req: express.Request, res: express.Response) => {
 });
 
 // add an active user
-app.put("/users/:name", (req: express.Request, res: express.Response) => {
-  console.log("PUT /users/:name");
-  const name = req.params.name;
-  if (!name) {
+app.post("/user/:userName", (req: express.Request, res: express.Response) => {
+  console.log("POST /user/:userName");
+  const userName = req.params.userName;
+  if (!userName) {
     res.status(400).send("userName is required");
     return;
   }
-  userController.addUser(name);
+  userController.addUser(userName);
   const users = userController.getAllUsers();
 
   res.status(200).send(users);
 });
 
 // promote a user to admin
-app.put("/users/promote", (req: express.Request, res: express.Response) => {
+app.put("/user/promote", (req: express.Request, res: express.Response) => {
   const userName = req.body.userName;
   if (!userName) {
     res.status(400).send("userName is required");
@@ -116,7 +116,7 @@ app.put("/users/promote", (req: express.Request, res: express.Response) => {
 });
 
 // assign a user to a group
-app.put("/users/assign", (req: express.Request, res: express.Response) => {
+app.put("/user/assign", (req: express.Request, res: express.Response) => {
   const userName = req.body.userName;
   if (!userName) {
     res.status(400).send("userName is required");
