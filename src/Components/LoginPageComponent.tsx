@@ -114,7 +114,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
     
 
     // old function to try and log in - used for normal users
-  function getUserLogin() {
+    function getUserLogin() {
     return <div>
       <input
         id="userNameInput"
@@ -139,7 +139,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 
   //updated login funtion - for admin name request login info
   // need to write back end and way to set admin names todo
-  function handleLogin() {
+  async function handleLogin() {
     const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
   
     if (checkUserNameInput()) { //is username not blank
@@ -147,9 +147,10 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
       if (!checkUserName(userName)) { // if username matches regex 
         return;
       }
-  
-      const loginResponse = dummyLoginCall(userName);
-      // const loginResponse = loginCall(userName); change to this when backend is ready
+
+      try {
+        //const loginResponse = dummyLoginCall(userName);
+      const loginResponse = await loginCall(userName); //change to this when backend is ready
       // TODO
   
       if ('error' in loginResponse) {
@@ -173,6 +174,12 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
       }
       */
       spreadSheetClient.userName = loginResponse.username;
+      } catch (error) {
+        // Handle any errors that occurred during the backend calls
+        return { error: "Login error: " + (error instanceof Error ? error.message : "Unknown error") };
+      }
+  
+      
     }
   }
   
@@ -206,20 +213,30 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 
 
 // Function to check if the password is correct (replace with actual backend implementation)
-async function backendCheckPassword(encryptedPassword: string): Promise<boolean> {
+async function backendCheckPassword(userName: string, encryptedPassword: string): Promise<boolean> {
   // Simulate a backend request (replace with actual fetch or axios call)
-  const response = await fetch('https://dummy-backend-url/check-password', {
-    method: 'POST',
+  const response = await fetch('/user/promote', {
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ encryptedPassword }),
+    body: JSON.stringify({ userName, encryptedPassword }),
   });
 
   // Assuming the backend returns a JSON object with a 'isPasswordCorrect' property
-  const result = await response.json();
-
-  return result.isPasswordCorrect; // Replace with actual property based on your backend response
+  //const result = await response.json();
+  
+  const responseText = await response.text();
+  console.log(responseText);
+  const contentType = response.headers.get('Content-Type');
+  console.log(contentType);
+  // if the response is 200 then the password is correct
+  // if the response is error then the password is incorrect
+  if (response.status === 200) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 async function hashPassword(password: string) {
@@ -247,10 +264,10 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
 
         try {
           // Send encrypted password to backend to check if correct
-          const isPasswordCorrect = await backendCheckPassword(encryptedPassword);
+          const isPasswordCorrect = await backendCheckPassword(userName, encryptedPassword);
 
           if (isPasswordCorrect) {
-            return { username: "Admin", isAdmin: true };
+            return { username: userName, isAdmin: true };
           } else {
             // Return an error for wrong password
             return { error: "Wrong password" };

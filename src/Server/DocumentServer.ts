@@ -124,7 +124,8 @@ app.put("/user/promote", (req: express.Request, res: express.Response) => {
     });
   }
   const users = userController.getAllUsers();
-  res.status(200).send(users);
+  //res.status(200).send(users);
+  res.status(200).json(users);
 });
 
 // assign a user to a group
