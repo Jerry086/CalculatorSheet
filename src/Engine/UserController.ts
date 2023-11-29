@@ -129,6 +129,17 @@ class UserController {
     return result;
   }
 
+  // get the names of all non-admin users
+  getNonAdminUsers(): string[] {
+    const nonAdminUsers: string[] = [];
+    this.users.forEach((user) => {
+      if (!user.isAdmin) {
+        nonAdminUsers.push(user.user);
+      }
+    });
+    return nonAdminUsers;
+  }
+
   // promote a user to admin
   promoteUser(user: string, password: string): boolean {
     const index = this.users.findIndex((u) => u.user === user);

@@ -294,6 +294,23 @@ class Database {
   }
 
   /**
+   * locks a collection of users from sending messages
+   * @param {string[]} users
+   * @memberof Database
+   * */
+  lockUsers(users: string[]) {
+    users.forEach((user) => {
+      // find if the user is already locked
+      const index = this.lockedChatUsers.findIndex((u) => u === user);
+      if (index === -1) {
+        // add the user
+        this.lockedChatUsers.push(user);
+        console.log("locked user,", user);
+      }
+    });
+  }
+
+  /**
    * Unlock a user from sending messages
    *
    * @param {string} user
@@ -307,6 +324,32 @@ class Database {
       this.lockedChatUsers.splice(index, 1);
       console.log("unlocked user,", user);
     }
+  }
+
+  /**
+   * unlocks a collection of users from sending messages
+   * @param {string[]} users
+   * @memberof Database
+   * */
+  unlockUsers(users: string[]) {
+    users.forEach((user) => {
+      // find if the user is already locked
+      const index = this.lockedChatUsers.findIndex((u) => u === user);
+      if (index !== -1) {
+        // remove the user
+        this.lockedChatUsers.splice(index, 1);
+        console.log("unlocked user,", user);
+      }
+    });
+  }
+
+  /**
+   * unlock all users from sending messages
+   * @memberof Database
+   * */
+  unlockAllUsers() {
+    this.lockedChatUsers = [];
+    console.log("unlocked all users");
   }
 }
 export { Database, Message };

@@ -96,6 +96,7 @@ app.post("/user/:userName", (req: express.Request, res: express.Response) => {
 });
 
 // promote a user to admin
+// TODO: unlock the new admin from all sources
 app.put("/user/promote", (req: express.Request, res: express.Response) => {
   const userName = req.body.userName;
   if (!userName) {
@@ -435,6 +436,22 @@ app.put("/messages/lock", (req, res) => {
   return res.json(result);
 });
 
+// this locks all users from sending messages
+app.put("/messages/lockAll", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  console.log(`put /messages/lockall`);
+  const users = userController.getNonAdminUsers();
+  database.lockUsers(users);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
 // this unlocks a user from sending messages
 app.put("/messages/unlock", (req, res) => {
   const admin = req.body.admin;
@@ -450,6 +467,21 @@ app.put("/messages/unlock", (req, res) => {
   }
   console.log(`put /messages/unlock/${user}`);
   database.unlockUser(user);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
+// this unlocks all users from sending messages
+app.put("/messages/unlockAll", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  console.log(`put /messages/unlockAll`);
+  database.unlockAllUsers();
   const result = database.getMessages("");
   return res.json(result);
 });
