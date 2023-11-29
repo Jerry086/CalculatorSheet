@@ -94,7 +94,6 @@ export class SpreadSheetController {
     }
 
     this.releaseEditAccess(user);
-    userData.isEditing = false;
     this._contributingUsers.set(user, userData);
     userData.formulaBuilder.setFormula(
       this._memory.getCellByLabel(cellLabel).getFormula()
@@ -148,21 +147,39 @@ export class SpreadSheetController {
   }
 
   releaseEditAccess(user: string): void {
-    // if the user is not editing a cell then we are done
-    if (!this._contributingUsers.get(user)?.isEditing) {
+    const userData = this._contributingUsers.get(user);
+    // if the user is not a contributing user then we are done
+    if (!userData) {
       return;
     }
-
-    const editingCell: string | undefined =
-      this._contributingUsers.get(user)?.cellLabel;
-    if (editingCell) {
-      if (this._cellsBeingEdited.has(editingCell)) {
-        this._cellsBeingEdited.delete(editingCell);
-      }
+    // if the user is not editing a cell then we are done
+    if (!userData.isEditing) {
+      return;
     }
+    userData.isEditing = false;
 
+    const editingCell: string = userData.cellLabel;
+    if (this._cellsBeingEdited.has(editingCell)) {
+      this._cellsBeingEdited.delete(editingCell);
+    }
     // // remove the user from the list of users
     // this._contributingUsers.delete(user);
+  }
+
+  /**
+   * lock the users out of the sheet
+   */
+  lockUsers(users: string[]): void {
+    users.forEach((user) => {
+      // if the user is editing a cell then release the edit
+      if (this._contributingUsers.get(user)?.isEditing) {
+        this.releaseEditAccess(user);
+      }
+      // add the user to the locked list if they are not already there
+      if (!this._lockedSheetUsers.includes(user)) {
+        this._lockedSheetUsers.push(user);
+      }
+    });
   }
 
   /**

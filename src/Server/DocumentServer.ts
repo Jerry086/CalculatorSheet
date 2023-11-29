@@ -112,6 +112,10 @@ app.put("/user/promote", (req: express.Request, res: express.Response) => {
   console.log(`promote ${userName} with password ${password}`);
 
   const result = userController.promoteUser(userName, password);
+  // unlock the admin if it was locked
+  if (result) {
+    database.unlockUser(userName);
+  }
   const users = userController.getAllUsers();
   res.status(200).send(users);
 });
@@ -366,6 +370,35 @@ app.put(
     const resultJSON = documentHolder.clearFormula(name, userName);
 
     res.status(200).send(resultJSON);
+  }
+);
+
+// lock all users from editing a document
+app.put(
+  "/document/lock/:name",
+  (req: express.Request, res: express.Response) => {
+    const name = req.params.name;
+    // get all document names
+    const documentNames = documentHolder.getDocumentNames();
+    // check if the document exists
+    if (documentNames.indexOf(name) === -1) {
+      res.status(404).send(`Document ${name} not found`);
+      return;
+    }
+    const admin = req.body.admin;
+    if (!admin) {
+      res.status(400).send("admin is required");
+      return;
+    }
+    if (!userController.isAdmin(admin)) {
+      res.status(400).send("You are not an admin");
+      return;
+    }
+    // lock all users
+    const nonAdminUsers = userController.getNonAdminUsers();
+    documentHolder.lockUsers(name, nonAdminUsers);
+
+    res.status(200).send("locked");
   }
 );
 
