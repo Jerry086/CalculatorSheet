@@ -74,6 +74,7 @@ class SpreadSheetClient {
       cells: new Map<string, CellTransport>(),
       contributingUsers: [],
       errorMessage: "",
+      lockedSheetUsers: [],
     };
     for (let row = 0; row < document.rows; row++) {
       for (let column = 0; column < document.columns; column++) {
@@ -429,15 +430,15 @@ class SpreadSheetClient {
     const isEditing = document.isEditing;
     const contributingUsers = document.contributingUsers;
     const errorMessage = document.errorMessage;
-    if(errorMessage){
-    console.log(`errorMessage = ${errorMessage}`);
+    const lockedSheetUsers = document.lockedSheetUsers;
+    if (errorMessage) {
+      console.log(`errorMessage = ${errorMessage}`);
     }
 
     // create the document
     this._document = {
       formula: formula,
       result: result,
-
       currentCell: currentCell,
       columns: columns,
       rows: rows,
@@ -445,6 +446,7 @@ class SpreadSheetClient {
       cells: new Map<string, CellTransport>(),
       contributingUsers: contributingUsers,
       errorMessage: errorMessage,
+      lockedSheetUsers: lockedSheetUsers,
     };
     // create the cells
     const cells = document.cells as unknown as CellTransportMap;

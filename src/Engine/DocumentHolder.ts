@@ -191,6 +191,21 @@ export class DocumentHolder {
     return documentJSON;
   }
 
+  public lockUsers(docName: string, users: string[]): void {
+    let document = this._documents.get(docName);
+    document!.lockUsers(users);
+  }
+
+  public unlockUser(docName: string, user: string): void {
+    let document = this._documents.get(docName);
+    document!.unlockUser(user);
+  }
+
+  public unlockAllUsers(docName: string): void {
+    let document = this._documents.get(docName);
+    document!.unlockAllUsers();
+  }
+
   public clearFormula(docName: string, user: string): string {
     let document = this._documents.get(docName);
 

@@ -43,6 +43,8 @@ export interface DocumentTransport {
   isEditing: boolean;
   contributingUsers: UserEditing[];
   errorMessage: string;
+  // locked users
+  lockedSheetUsers: string[];
 }
 
 // message container
@@ -57,4 +59,19 @@ export interface MessageContainer {
 export interface MessagesContainer {
   messages: MessageContainer[];
   paginationToken: string;
+  // locked users
+  lockedChatUsers: string[];
+  error: string;
+}
+
+// user container
+export interface UserContainer {
+  user: string;
+  isAdmin: boolean;
+  group: number;
+}
+
+export interface UsersContainer {
+  users: UserContainer[];
+  error: string;
 }

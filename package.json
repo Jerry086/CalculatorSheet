@@ -28,7 +28,8 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
     "whatwg-url": "^13.0.0",
-    "zlib": "^1.0.5"
+    "zlib": "^1.0.5",
+    "bcrypt": "^5.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

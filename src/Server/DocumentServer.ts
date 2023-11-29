@@ -32,6 +32,7 @@ import cors from "cors";
 import { DocumentHolder } from "../Engine/DocumentHolder";
 import { PortsGlobal } from "../ServerDataDefinitions";
 import { Database } from "../Engine/Database";
+import UserController from "../Engine/UserController";
 
 // define a debug flag to turn on debugging
 let debug = true;
@@ -43,12 +44,6 @@ if (!debug) {
 
 const app = express();
 app.use(cors());
-// app.use((req, res, next) => {
-//     res.setHeader('Access-Control-Allow-Origin', 'http://pencil.local:3000');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-//     next();
-// });
 app.use(bodyParser.json());
 
 // Add a middleware function to log incoming requests
@@ -59,23 +54,122 @@ app.use((req, res, next) => {
   next();
 });
 
-// initialize the engine
-const documentHolder = new DocumentHolder();
-const database = new Database();
-
 // test the server
 app.get("/ping", (req, res) => {
   console.log("ping");
   return res.json({ message: "pong" });
 });
 
-// GET /documents
+// toggle debug
+app.get("/debug", (req: express.Request, res: express.Response) => {
+  debug = !debug;
+  console.log(`debug is ${debug}`);
+  res.status(200).send(`debug is ${debug}`);
+});
+
+// initialize the engine
+const documentHolder = new DocumentHolder();
+const database = new Database();
+const userController = new UserController();
+
+/**
+ * User Server
+ * GET /users
+ * POST /user/:userName
+ * PUT /user/promote
+ * PUT /user/assign
+ */
+// get user list
+app.get("/users", (req: express.Request, res: express.Response) => {
+  const users = userController.getAllUsers();
+  res.send(users);
+});
+
+// add an active user
+app.post("/user/:userName", (req: express.Request, res: express.Response) => {
+  console.log("POST /user/:userName");
+  const userName = req.params.userName;
+  if (!userName) {
+    res.status(400).send("userName is required");
+    return;
+  }
+  userController.addUser(userName);
+  const users = userController.getAllUsers();
+
+  res.status(200).send(users);
+});
+
+// promote a user to admin
+app.put("/user/promote", (req: express.Request, res: express.Response) => {
+  const userName = req.body.userName;
+  if (!userName) {
+    res.status(400).send("userName is required");
+    return;
+  }
+  const password = req.body.password;
+  if (!password) {
+    res.status(400).send("password is required");
+    return;
+  }
+
+  console.log(`promote ${userName} with password ${password}`);
+
+  const result = userController.promoteUser(userName, password);
+  // unlock the admin if it was locked
+  if (result) {
+    database.unlockUser(userName);
+    const documentNames = documentHolder.getDocumentNames();
+    documentNames.forEach((documentName) => {
+      documentHolder.unlockUser(documentName, userName);
+    });
+  }
+  const users = userController.getAllUsers();
+  res.status(200).send(users);
+});
+
+// assign a user to a group
+app.put("/user/assign", (req: express.Request, res: express.Response) => {
+  const userName = req.body.userName;
+  if (!userName) {
+    res.status(400).send("userName is required");
+    return;
+  }
+  const groupName = req.body.groupName;
+  if (!groupName) {
+    res.status(400).send("groupName is required");
+    return;
+  }
+
+  console.log(`assign ${userName} to group ${groupName}`);
+
+  const result = userController.assignGroup(userName, groupName);
+  const users = userController.getAllUsers();
+  res.status(200).send(users);
+});
+
+/**
+ * Document Server
+ * GET /documents
+ * PUT /documents/:name
+ * POST /documents/create/:name
+ * PUT /document/cell/edit/:name
+ * PUT /document/cell/view/:name
+ * PUT /document/addtoken/:name
+ * PUT /document/addcell/:name
+ * PUT /document/removetoken/:name
+ * PUT /document/clear/formula/:name
+ * PUT /document/lock/:name
+ * PUT /document/unlock/:name
+ * PUT /document/lockall
+ * PUT /document/unlockall
+ */
+// get a list of document names
 app.get("/documents", (req: express.Request, res: express.Response) => {
   const documentNames = documentHolder.getDocumentNames();
   res.send(documentNames);
 });
 
-// PUT /documents/:name
+// add a user to a document for viewing
 // userName is in the document body
 app.put("/documents/:name", (req: express.Request, res: express.Response) => {
   const name = req.params.name;
@@ -101,17 +195,13 @@ app.put("/documents/:name", (req: express.Request, res: express.Response) => {
   res.status(200).send(document);
 });
 
-app.get("/debug", (req: express.Request, res: express.Response) => {
-  debug = !debug;
-  console.log(`debug is ${debug}`);
-  res.status(200).send(`debug is ${debug}`);
-});
-
+// reset all documents, this is for testing
 app.post("/documents/reset", (req: express.Request, res: express.Response) => {
   documentHolder.reset();
   res.status(200).send("reset");
 });
 
+// create a document
 app.post(
   "/documents/create/:name",
   (req: express.Request, res: express.Response) => {
@@ -132,6 +222,7 @@ app.post(
   }
 );
 
+// request to edit a cell
 app.put(
   "/document/cell/edit/:name",
   (req: express.Request, res: express.Response) => {
@@ -151,6 +242,10 @@ app.put(
       res.status(400).send("userName is required");
       return;
     }
+    if (!cell) {
+      res.status(400).send("cell label is required");
+      return;
+    }
     // request access to the cell
     const result = documentHolder.requestEditAccess(name, cell, userName);
     const documentJSON = documentHolder.getDocumentJSON(name, userName);
@@ -159,6 +254,7 @@ app.put(
   }
 );
 
+// request to view a cell
 app.put(
   "/document/cell/view/:name",
   (req: express.Request, res: express.Response) => {
@@ -177,15 +273,19 @@ app.put(
       res.status(400).send("userName is required");
       return;
     }
+    if (!cell) {
+      res.status(400).send("cell label is required");
+      return;
+    }
     // request access to the cell
     const result = documentHolder.requestViewAccess(name, cell, userName);
-
     const documentJSON = documentHolder.getDocumentJSON(name, userName);
 
     res.status(200).send(documentJSON);
   }
 );
 
+// add a token to a spreadsheet cell
 app.put(
   "/document/addtoken/:name",
   (req: express.Request, res: express.Response) => {
@@ -203,13 +303,18 @@ app.put(
       res.status(400).send("userName is required");
       return;
     }
-    // add the
+    if (!token) {
+      res.status(400).send("token is required");
+      return;
+    }
+    // add the token
     const resultJSON = documentHolder.addToken(name, token, userName);
 
     res.status(200).send(resultJSON);
   }
 );
 
+// add a cell reference to a spreadsheet cell
 app.put(
   "/document/addcell/:name",
   (req: express.Request, res: express.Response) => {
@@ -228,6 +333,10 @@ app.put(
       res.status(400).send("userName is required");
       return;
     }
+    if (!cell) {
+      res.status(400).send("cell reference is required");
+      return;
+    }
     // add the token
     const resultJSON = documentHolder.addCell(name, cell, userName);
 
@@ -235,6 +344,7 @@ app.put(
   }
 );
 
+// remove a token from a spreadsheet cell
 app.put(
   "/document/removetoken/:name",
   (req: express.Request, res: express.Response) => {
@@ -258,7 +368,7 @@ app.put(
   }
 );
 
-// PUT /document/clear/formula/:name
+// clear the formula from a spreadsheet cell
 app.put(
   "/document/clear/formula/:name",
   (req: express.Request, res: express.Response) => {
@@ -282,39 +392,140 @@ app.put(
   }
 );
 
-// reset the database
+// lock all users from editing a document
+app.put(
+  "/document/lock/:name",
+  (req: express.Request, res: express.Response) => {
+    const name = req.params.name;
+    // get all document names
+    const documentNames = documentHolder.getDocumentNames();
+    // check if the document exists
+    if (documentNames.indexOf(name) === -1) {
+      res.status(404).send(`Document ${name} not found`);
+      return;
+    }
+    const admin = req.body.admin;
+    if (!admin) {
+      res.status(400).send("admin is required");
+      return;
+    }
+    if (!userController.isAdmin(admin)) {
+      res.status(400).send("You are not an admin");
+      return;
+    }
+    // lock all users
+    const nonAdminUsers = userController.getNonAdminUsers();
+    documentHolder.lockUsers(name, nonAdminUsers);
+
+    res.status(200).send(`Document ${name} locked`);
+  }
+);
+
+// unlock all users from editing a document
+app.put(
+  "/document/unlock/:name",
+  (req: express.Request, res: express.Response) => {
+    const name = req.params.name;
+    // get all document names
+    const documentNames = documentHolder.getDocumentNames();
+    // check if the document exists
+    if (documentNames.indexOf(name) === -1) {
+      res.status(404).send(`Document ${name} not found`);
+      return;
+    }
+    const admin = req.body.admin;
+    if (!admin) {
+      res.status(400).send("admin is required");
+      return;
+    }
+    if (!userController.isAdmin(admin)) {
+      res.status(400).send("You are not an admin");
+      return;
+    }
+    // unlock all users
+    documentHolder.unlockAllUsers(name);
+
+    res.status(200).send(`Document ${name} unlocked`);
+  }
+);
+
+// lock all documents
+app.put("/document/lockall", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    res.status(400).send("admin is required");
+    return;
+  }
+  if (!userController.isAdmin(admin)) {
+    res.status(400).send("You are not an admin");
+    return;
+  }
+  // lock all users
+  const nonAdminUsers = userController.getNonAdminUsers();
+  const documents = documentHolder.getDocumentNames();
+  documents.forEach((document) => {
+    documentHolder.lockUsers(document, nonAdminUsers);
+  });
+
+  res.status(200).send("All documents locked");
+});
+
+// unlock all documents
+app.put("/document/unlockall", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    res.status(400).send("admin is required");
+    return;
+  }
+  if (!userController.isAdmin(admin)) {
+    res.status(400).send("You are not an admin");
+    return;
+  }
+  // unlock all users
+  const documents = documentHolder.getDocumentNames();
+  documents.forEach((document) => {
+    documentHolder.unlockAllUsers(document);
+  });
+
+  res.status(200).send("All documents unlocked");
+});
+
+/**
+ * Chat Server
+ * GET /reset
+ * POST /message
+ * GET /messages/get/:pagingToken?
+ * GET /messages/getall
+ * PUT /messages/lock
+ * PUT /messages/unlock
+ * PUT /messages/lockAll
+ * PUT /messages/unlockAll
+ */
+// reset the chat history
 app.get("/reset", (req, res) => {
   console.log("GET /reset");
   database.reset();
   return res.json({ message: "reset" });
 });
 
-// GET /message/:user/:message
-// this adds a message to the database
-app.get("/message/:user/:message", (req, res) => {
-  const message = req.params.message;
-  const user = req.params.user;
-  console.log(`get /message/${message}/${user}`);
-  database.addMessage(user, message);
-  const result = database.getMessages("");
-  return res.json(result);
-});
-
-// POST /message
 // this adds a message to the database
 app.post("/message", (req, res) => {
   const { message, user } = req.body;
+  if (!message) {
+    return res.status(400).send("message is required");
+  }
+  if (!user) {
+    return res.status(400).send("user is required");
+  }
   console.log(`post /message with message: ${message} and user: ${user}`);
   database.addMessage(user, message);
   const result = database.getMessages("");
   return res.json(result);
 });
 
-// GET /messages/get/:pagingToken?
 // this gets messages from the database starting at the pagingToken
 app.get("/messages/get/:pagingToken?", (req, res) => {
   // if there is no :pagingToken, then it will be an empty string
-
   let pagingToken = req.params.pagingToken || "";
   if (pagingToken) {
     console.log(`get /messages/get/${pagingToken}`);
@@ -324,12 +535,83 @@ app.get("/messages/get/:pagingToken?", (req, res) => {
   return res.json(result);
 });
 
-// GET /messages/getall
 // this gets all the messages from the database, used for debugging
 // this is not used in the production mode
 app.get("/messages/getall", (req, res) => {
   const result = database.getAllMessages();
   console.log("get /messages/getall");
+  return res.json(result);
+});
+
+// this locks a user from sending messages
+app.put("/messages/lock", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  const user = req.body.user;
+  if (!user) {
+    return res.status(400).send("user is required");
+  }
+  if (userController.isAdmin(user)) {
+    return res.status(400).send("You cannot lock an admin");
+  }
+  console.log(`put /messages/lock/${user}`);
+  database.lockUser(user);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
+// this locks all users from sending messages
+app.put("/messages/lockAll", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  console.log(`put /messages/lockall`);
+  const users = userController.getNonAdminUsers();
+  database.lockUsers(users);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
+// this unlocks a user from sending messages
+app.put("/messages/unlock", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  const user = req.body.user;
+  if (!user) {
+    return res.status(400).send("user is required");
+  }
+  console.log(`put /messages/unlock/${user}`);
+  database.unlockUser(user);
+  const result = database.getMessages("");
+  return res.json(result);
+});
+
+// this unlocks all users from sending messages
+app.put("/messages/unlockAll", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    return res.status(400).send("admin is required");
+  }
+  if (!userController.isAdmin(admin)) {
+    return res.status(400).send("You are not an admin");
+  }
+  console.log(`put /messages/unlockAll`);
+  database.unlockAllUsers();
+  const result = database.getMessages("");
   return res.json(result);
 });
 
