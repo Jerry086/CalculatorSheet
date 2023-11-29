@@ -115,6 +115,10 @@ app.put("/user/promote", (req: express.Request, res: express.Response) => {
   // unlock the admin if it was locked
   if (result) {
     database.unlockUser(userName);
+    const documentNames = documentHolder.getDocumentNames();
+    documentNames.forEach((documentName) => {
+      documentHolder.unlockUser(documentName, userName);
+    });
   }
   const users = userController.getAllUsers();
   res.status(200).send(users);
@@ -266,7 +270,6 @@ app.put(
 );
 
 // add a token to a spreadsheet cell
-// TODO: controlled by user.isEditing, set it to false after locking
 app.put(
   "/document/addtoken/:name",
   (req: express.Request, res: express.Response) => {

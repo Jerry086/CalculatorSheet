@@ -183,6 +183,15 @@ export class SpreadSheetController {
   }
 
   /**
+   * unlock a user out of the sheet
+   * */
+  unlockUser(user: string): void {
+    // remove the user from the locked list if they are there
+    if (this._lockedSheetUsers.includes(user)) {
+      this._lockedSheetUsers.splice(this._lockedSheetUsers.indexOf(user), 1);
+    }
+  }
+  /**
    * unlock all users out of the sheet
    * */
   unlockAllUsers(): void {

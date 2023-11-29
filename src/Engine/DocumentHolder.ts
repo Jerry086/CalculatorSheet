@@ -196,6 +196,11 @@ export class DocumentHolder {
     document!.lockUsers(users);
   }
 
+  public unlockUser(docName: string, user: string): void {
+    let document = this._documents.get(docName);
+    document!.unlockUser(user);
+  }
+
   public unlockAllUsers(docName: string): void {
     let document = this._documents.get(docName);
     document!.unlockAllUsers();
