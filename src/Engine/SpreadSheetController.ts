@@ -183,6 +183,13 @@ export class SpreadSheetController {
   }
 
   /**
+   * unlock all users out of the sheet
+   * */
+  unlockAllUsers(): void {
+    this._lockedSheetUsers = [];
+  }
+
+  /**
    *  add token to current formula, this is not a cell and thus no dependency updating is needed
    *
    * @param token:string

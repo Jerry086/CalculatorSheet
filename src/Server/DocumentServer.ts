@@ -402,6 +402,34 @@ app.put(
   }
 );
 
+// unlock all users from editing a document
+app.put(
+  "/document/unlock/:name",
+  (req: express.Request, res: express.Response) => {
+    const name = req.params.name;
+    // get all document names
+    const documentNames = documentHolder.getDocumentNames();
+    // check if the document exists
+    if (documentNames.indexOf(name) === -1) {
+      res.status(404).send(`Document ${name} not found`);
+      return;
+    }
+    const admin = req.body.admin;
+    if (!admin) {
+      res.status(400).send("admin is required");
+      return;
+    }
+    if (!userController.isAdmin(admin)) {
+      res.status(400).send("You are not an admin");
+      return;
+    }
+    // unlock all users
+    documentHolder.unlockAllUsers(name);
+
+    res.status(200).send(`Document ${name} unlocked`);
+  }
+);
+
 // lock all documents
 app.put("/documents/lockall", (req, res) => {
   const admin = req.body.admin;
@@ -421,6 +449,26 @@ app.put("/documents/lockall", (req, res) => {
   });
 
   res.status(200).send("All documents locked");
+});
+
+// unlock all documents
+app.put("/documents/unlockall", (req, res) => {
+  const admin = req.body.admin;
+  if (!admin) {
+    res.status(400).send("admin is required");
+    return;
+  }
+  if (!userController.isAdmin(admin)) {
+    res.status(400).send("You are not an admin");
+    return;
+  }
+  // unlock all users
+  const documents = documentHolder.getDocumentNames();
+  documents.forEach((document) => {
+    documentHolder.unlockAllUsers(document);
+  });
+
+  res.status(200).send("All documents unlocked");
 });
 
 /**

@@ -196,6 +196,11 @@ export class DocumentHolder {
     document!.lockUsers(users);
   }
 
+  public unlockAllUsers(docName: string): void {
+    let document = this._documents.get(docName);
+    document!.unlockAllUsers();
+  }
+
   public clearFormula(docName: string, user: string): string {
     let document = this._documents.get(docName);
 
