@@ -228,15 +228,15 @@ async function backendCheckPassword(userName: string, encryptedPassword: string)
     },
     body: JSON.stringify({ userName: userName, password: encryptedPassword }),
   });
-  console.log(encryptedPassword);
+  //console.log(encryptedPassword);
 
   // Assuming the backend returns a JSON object with a 'isPasswordCorrect' property
   //const result = await response.json();
   
   const responseText = await response.text();
-  console.log(responseText);
-  const contentType = response.headers.get('Content-Type');
-  console.log(contentType);
+  //console.log(responseText);
+  //const contentType = response.headers.get('Content-Type');
+  //console.log(contentType);
   // if the response is 200 then the password is correct
   // if the response is error then the password is incorrect
   if (response.status === 200) {
@@ -251,10 +251,10 @@ async function hashPassword(password: string) {
 
   try {
     const hash = await bcrypt.hash(password, saltRounds);
-    console.log('Hash to store:', hash);
+    //console.log('Hash to store:', hash);
     return hash;
   } catch (error) {
-    console.error(error);
+    //console.error(error);
     throw error;
   }
 }
@@ -265,7 +265,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
     const password = prompt("Please enter your password");
 
     if (password != null && password !== "") {
-      console.log("password is " + password);
+      //console.log("password is " + password);
 
         const encryptedPassword = await hashPassword(password)
 
@@ -460,8 +460,8 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
   function loginPage() {
 
     //console.log("username & isadmin are ");
-    userName && console.log(userName);
-    isAdmin && console.log(isAdmin);
+    //userName && console.log(userName);
+    //isAdmin && console.log(isAdmin);
 
     return <table>
 
