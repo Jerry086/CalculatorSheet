@@ -10,6 +10,40 @@
   
 }
 
+
+.disabled-chat {
+  opacity: 0.6; /* Lower opacity for disabled look */
+  border-color: grey; /* Grey border to indicate disabled state */
+  pointer-events: none; /* Disables interaction with the chat */
+}
+
+.enabled-chat {
+  /* Additional styles for enabled chat, if any */
+  /* If no additional styles are needed, this can be left empty */
+}
+
+.disabled-chat .chat-message-list {
+  pointer-events: auto; /* Enables scrollbar interaction */
+}
+
+.enabled-chat {
+  /* Additional styles for enabled chat, if any */
+}
+
+/* Styles for customizing the scrollbar */
+.chat-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  border-radius: 5px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background-color: lightgrey;
+}
+
 .chat-message-list {
   max-height: 30vh; /* Relative to viewport height */
   overflow-y: auto;
