@@ -78,8 +78,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   function buildToolbar() {
     return (
       <div className="toolbar">
-        <button >Lock All</button> 
-        <button >Unlock All</button> 
+        <button onClick={handleLockSheets}>Lock All</button> 
+        <button onClick={handleUnlockSheets}>Unlock All</button> 
         <button onClick={handleMuteChat}>Mute Chat</button>
         <button onClick={handleUnmuteChat}>Unmute Chat</button>
       </div>
@@ -90,6 +90,70 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
     //  onClick={console.log("muteChat")}
     // onClick={console.log("unmuteChat")}
   }
+
+
+  async function handleLockSheets() {
+    for (const sheetName in sheetsData) {
+      if (sheetsData.hasOwnProperty(sheetName)) {
+        const sheet = sheetsData[sheetName];
+        if (!sheet.isUnlocked) {
+          // send request to backend to lock sheet
+          try {
+            const response = await fetch(`${baseUrl}/document/lock/${sheetName}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ admin: userName }),
+            });
+      
+            if (response.ok) {
+              console.log("%s unlocked", sheetName);
+            } else {
+              throw new Error(`Error locking sheets: ${response.status}`);
+            }
+          } catch (error) {
+            // Handle any errors that occurred during the backend calls
+            return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
+          }
+        } else {
+          // do nothing
+        }
+      }
+    }
+  }
+
+  async function handleUnlockSheets() {
+    for (const sheetName in sheetsData) {
+      if (sheetsData.hasOwnProperty(sheetName)) {
+        const sheet = sheetsData[sheetName];
+        if (sheet.isUnlocked) {
+          // send request to backend to unlock sheet
+          try {
+            const response = await fetch(`${baseUrl}/document/unlock/${sheetName}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ admin: userName }),
+            });
+      
+            if (response.ok) {
+              console.log("%s unlocked", sheetName);
+            } else {
+              throw new Error(`Error locking sheets: ${response.status}`);
+            }
+          } catch (error) {
+            // Handle any errors that occurred during the backend calls
+            return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
+          }
+        } else {
+          // do nothing
+        }
+      }
+    }
+  }
+
 
   async function handleMuteChat() {
     try {
@@ -144,6 +208,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   
     // Specific sheets to modify - dummy data 
     // replace with call to backend with isAdminKey
+    // specificSheets contains the name of locked sheets
     const specificSheets = ['test1', 'test10.1', 'test10', 'test11', 'test12', 'test13'];
     let index = 1;
   
@@ -152,6 +217,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
         // For specific sheets, set isUnlocked to false and add fake usernames
         data[sheet] = {
           isUnlocked: false,
+          // TODO: Replace with actual active users
           activeUsers: Array.from({ length: index++ }, (_, i) => `user${i + 1}`)
         };
       } else if (!data[sheet]) {
@@ -159,7 +225,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
         data[sheet] = { isUnlocked: true, activeUsers: [] };
       }
     });
-  
+    
     return data;
   }
     
@@ -492,7 +558,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
                       onChange={(e) => {
                         setSheetsData({
                           ...sheetsData,
-                          [sheetName]: { ...sheet, isUnlocked: !e.target.checked }
+                          [sheetName]: { ...sheet, isUnlocked: !sheet.isUnlocked }
                         });
                         e.target.style.borderColor = 'red'; // indicate unsaved change
                       }}

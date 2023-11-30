@@ -49,7 +49,7 @@ app.use(bodyParser.json());
 // Add a middleware function to log incoming requests
 app.use((req, res, next) => {
   if (debug) {
-    console.log(`${req.method} ${req.url}`);
+    //console.log(`${req.method} ${req.url}`);
   }
   next();
 });
@@ -400,6 +400,7 @@ app.put(
   "/document/lock/:name",
   (req: express.Request, res: express.Response) => {
     const name = req.params.name;
+    console.log(`PUT /document/lock/${name}`);
     // get all document names
     const documentNames = documentHolder.getDocumentNames();
     // check if the document exists
