@@ -48,6 +48,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   const [documents, setDocuments] = useState<string[]>([]);
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
   const [usersContainer, setusersContainer] = useState<UsersContainer>();
+  const [isChatLocked, setIsChatLocked] = useState(false);
 
 
 
@@ -76,8 +77,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
       <div className="toolbar">
         <button >Lock All</button> 
         <button >Unlock All</button> 
-        <button >Mute Chat</button>
-        <button >Unmute Chat</button>
+        <button onClick={handleMuteChat}>Mute Chat</button>
+        <button onClick={handleUnmuteChat}>Unmute Chat</button>
       </div>
     );
     //TODO ADD METHODS
@@ -85,6 +86,53 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
     //  onClick={console.log("unlockAll") }
     //  onClick={console.log("muteChat")}
     // onClick={console.log("unmuteChat")}
+  }
+
+  async function handleMuteChat() {
+    try {
+      const chatClientInstance = new ChatClient();
+      const baseUrl = chatClientInstance.getBaseURL();
+      const response = await fetch(`${baseUrl}/messages/lockAll`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ admin: userName }),
+      });
+
+      if (response.ok) {
+        setIsChatLocked(true);
+        console.log("chat locked");
+      } else {
+        throw new Error(`Error muting chat: ${response.status}`);
+      }
+    } catch (error) {
+      // Handle any errors that occurred during the backend calls
+      return { error: "Mute chat error: " + (error instanceof Error ? error.message : "Unknown error") };
+    }
+  }
+
+  async function handleUnmuteChat() {
+    try {
+      const chatClientInstance = new ChatClient();
+      const baseUrl = chatClientInstance.getBaseURL();
+      const response = await fetch(`${baseUrl}/messages/unlockAll`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ admin: userName }),
+      });
+
+      if (response.ok) {
+        setIsChatLocked(false);
+      } else {
+        throw new Error(`Error unmuting chat: ${response.status}`);
+      }
+    } catch (error) {
+      // Handle any errors that occurred during the backend calls
+      return { error: "Unmute chat error: " + (error instanceof Error ? error.message : "Unknown error") };
+    }
   }
     
 // fetches extra info for admin users -TODO
