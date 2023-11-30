@@ -7,13 +7,14 @@ import ChatClient from "../Engine/ChatClient";
 
 interface ChatComponentProps {
   userName: string;
+  isLocked:boolean;
 }
 
 
 
 const chatClient = new ChatClient();
 
-const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
+const ChatComponent: React.FC<ChatComponentProps> = ({ userName, isLocked }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messageList, setMessageList] = useState<MessageContainer[]>([]);
@@ -105,13 +106,13 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
   };
 
   return (
-    <div className="chat-container">
+    <div className={`chat-container `}>
       <div className={`button-row  ${isCollapsed ? "hidden-button" : "shown-button"}`} onClick={toggleCollapse}>
         <span className="button-text">{isCollapsed ? "+" : "-"}</span>
       </div>
 
       {!isCollapsed && (
-        <>
+        <div className={` ${isLocked ? "disabled-chat" : "enabled-chat"}`}>
           <ul className="chat-message-list" onScroll={handleScroll} ref={messageListRef}>
             {[...messageList].reverse().map((message, index) => (
               <li
@@ -129,9 +130,13 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
 
           <div className="input-area">
             <textarea
+             readOnly={isLocked} 
               value={inputValue}
               onChange={handleInputChange}
               onKeyUp={(event) => {
+                if (isLocked) {
+                  return;
+              }
                 if (event.key === "Enter" && !event.ctrlKey) {
                   event.preventDefault(); // Prevent default behavior of Enter key
                   handleSendMessage();
@@ -143,11 +148,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
               className="chat-textarea"
               placeholder="Type your message..."
             />
-            <button onClick={handleSendMessage} className="send-button">
+            <button onClick={handleSendMessage}  disabled={isLocked} className="send-button">
               Send
             </button>
           </div>
-        </>
+          </div>
       )}
     </div>
   );
