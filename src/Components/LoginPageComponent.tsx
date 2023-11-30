@@ -40,6 +40,8 @@ interface SheetsDataType {
   [key: string]: SheetData;
 }
 
+const chatClientInstance = new ChatClient();
+const baseUrl = chatClientInstance.getBaseURL();
 
 function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element {
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
@@ -49,6 +51,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
   const [usersContainer, setusersContainer] = useState<UsersContainer>();
   const [isChatLocked, setIsChatLocked] = useState(false);
+  
 
 
 
@@ -90,8 +93,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 
   async function handleMuteChat() {
     try {
-      const chatClientInstance = new ChatClient();
-      const baseUrl = chatClientInstance.getBaseURL();
+      //const chatClientInstance = new ChatClient();
+      //const baseUrl = chatClientInstance.getBaseURL();
       const response = await fetch(`${baseUrl}/messages/lockAll`, {
         method: 'PUT',
         headers: {
@@ -114,8 +117,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 
   async function handleUnmuteChat() {
     try {
-      const chatClientInstance = new ChatClient();
-      const baseUrl = chatClientInstance.getBaseURL();
+      //const chatClientInstance = new ChatClient();
+      //const baseUrl = chatClientInstance.getBaseURL();
       const response = await fetch(`${baseUrl}/messages/unlockAll`, {
         method: 'PUT',
         headers: {
@@ -195,8 +198,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   async function getActiveUsers() {
     try {
       // Simulate a backend request (replace with actual fetch or axios call)
-      const chatClientInstance = new ChatClient();
-      const baseUrl = chatClientInstance.getBaseURL();
+      //const chatClientInstance = new ChatClient();
+      //const baseUrl = chatClientInstance.getBaseURL();
       const response = await fetch(`${baseUrl}/user`, {
         method: 'GET',
         headers: {
@@ -224,8 +227,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   // Function to register a user (replace with actual backend implementation)
   async function registerUser(userName: string): Promise<boolean> {
     // Simulate a backend request (replace with actual fetch or axios call)
-    const chatClientInstance = new ChatClient();
-    const baseUrl = chatClientInstance.getBaseURL();
+    //const chatClientInstance = new ChatClient();
+    //const baseUrl = chatClientInstance.getBaseURL();
     const response = await fetch(`${baseUrl}/user/${userName}`, {
       method: 'POST',
       headers: {
@@ -323,8 +326,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 // Function to check if the password is correct (replace with actual backend implementation)
 async function backendCheckPassword(userName: string, encryptedPassword: string): Promise<boolean> {
   // Simulate a backend request (replace with actual fetch or axios call)
-  const chatClientInstance = new ChatClient();
-  const baseUrl = chatClientInstance.getBaseURL();
+  //const chatClientInstance = new ChatClient();
+  //const baseUrl = chatClientInstance.getBaseURL();
   const response = await fetch(`${baseUrl}/user/promote`, {
     method: 'PUT',
     headers: {
