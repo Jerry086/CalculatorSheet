@@ -9,6 +9,7 @@ import ChatComponent from './ChatComponent';
 
 import { ButtonNames } from "../Engine/GlobalDefinitions";
 import ServerSelector from "./ServerSelector";
+import { isSnapshotPath } from "jest-snapshot";
 
 
 interface SpreadSheetProps {
@@ -32,11 +33,26 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
   const [currentCell, setCurrentCell] = useState(spreadSheetClient.getWorkingCellLabel());
   const [currentlyEditing, setCurrentlyEditing] = useState(spreadSheetClient.getEditStatus());
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
+  const [activeUsers, setActiveUsers] = useState<string[]>([]);
+  const [isSheetLocked, setisSheetLocked] = useState(() => {
+    const storedisSheetLocked = window.sessionStorage.getItem("isSheetLocked");
+    return storedisSheetLocked ? storedisSheetLocked === "true" : false;
+  });
+  const [isMessengerLocked, setisMessengerLocked] = useState(() => {
+    const storedisMessengerLocked = window.sessionStorage.getItem("isMessengerLocked");
+    return storedisMessengerLocked ? storedisMessengerLocked === "true" : false;
+  });
   const [serverSelected, setServerSelected] = useState("localhost");
+  const [isAdmin, setIsAdmin] = useState(() => {
+    const storedIsAdmin = window.sessionStorage.getItem("isAdmin");
+    return storedIsAdmin ? storedIsAdmin === "true" : false;
+  });
 
 
   function updateDisplayValues(): void {
     spreadSheetClient.userName = userName;
+    spreadSheetClient.isSheetLocked = isSheetLocked;
+    spreadSheetClient.isMessengerLocked = isMessengerLocked;
     spreadSheetClient.documentName = documentName;
     setFormulaString(spreadSheetClient.getFormulaString());
     setResultString(spreadSheetClient.getResultString());
@@ -44,6 +60,17 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
     setCells(spreadSheetClient.getSheetDisplayStringsForGUI());
     setCurrentCell(spreadSheetClient.getWorkingCellLabel());
     setCurrentlyEditing(spreadSheetClient.getEditStatus());
+    // userObject.isAdmin = isAdmin; // update here
+    // send is user is live message here // todo 
+    if(userName){pingActive()}
+    if(userName){
+      let activeUsernamesString =   spreadSheetClient.activeUsers;
+      // console.log(activeUsernamesString)
+      let userList = activeUsernamesString.split(",").map(u => u.split(":")[0]);
+       setActiveUsers(userList);
+
+    }
+
   }
 
   // useEffect to refetch the data every 1/20 of a second
@@ -53,6 +80,36 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
     }, 50);
     return () => clearInterval(interval);
   });
+
+  function checkPerms(feature: 'messenger' | 'sheet'): boolean {
+    if (feature === "sheet") {
+        // Allow access if the sheet is not locked or if the user is an admin
+        return !isSheetLocked || isAdmin;
+    } else if (feature === "messenger") {
+        // Allow access if messenger is not locked or if the user is an admin
+        return !isMessengerLocked || isAdmin;
+    }
+
+    // Optional: return a default value or throw an error for unknown features
+    throw new Error("Invalid feature specified");
+}
+
+
+function lockItems() {
+  spreadSheetClient.isSheetLockedAdmin(!isSheetLocked!, true)
+  setisSheetLocked(spreadSheetClient.isSheetLocked);
+  spreadSheetClient.isMessengerLockedAdmin(!isMessengerLocked!, true)
+  setisMessengerLocked(spreadSheetClient.isMessengerLocked);
+
+}
+
+function pingActive() {
+  //sends an I'm alive call to the server.
+  spreadSheetClient.updateActiveUsers(userName);
+}
+
+
+
 
   function returnToLoginPage() {
 
@@ -75,7 +132,10 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
       alert("Please enter a user name");
       return false;
     }
-    return true;
+
+      return true;
+
+
   }
 
   /**
@@ -193,13 +253,31 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
           onClick={onCellClick}
           currentCell={currentCell}
           currentlyEditing={currentlyEditing} ></SheetHolder>}
-        <KeyPad onButtonClick={onButtonClick}
+        <KeyPad 
+        isLocked={isSheetLocked}
+        
+        onButtonClick={onButtonClick}
           onCommandButtonClick={onCommandButtonClick}
           currentlyEditing={currentlyEditing}></KeyPad>
         <ServerSelector serverSelector={serverSelector} serverSelected={serverSelected} />
         <button onClick={returnToLoginPage} className="returnToLoginButton">Return to Login Page</button>
+        <button onClick={lockItems} className="returnToLoginButton">Lock items</button>
+        <br />
+        <br />
+        <div>
+            {activeUsers && activeUsers.length > 0 && (
+                <div  style={{ border: '1px solid white', listStyleType: 'none', padding: '10px', fontSize: '18px', width: '30%' }}>
+                    <p>Active Users</p>
+                    <ul>
+                        {activeUsers.map((user, index) => (
+                            <li key={index}>{user}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
       </div>
-      {userName && <ChatComponent userName={userName}/>}
+      {userName && <ChatComponent userName={userName} isLocked={isMessengerLocked}/>}
     </div>
 
   )
