@@ -37,12 +37,11 @@ class SpreadSheetClient {
   private _server: string = "";
   private _documentList: string[] = [];
   private _errorCallback: (error: string) => void = () => {};
+  private _isSheetLocked: boolean = false;
+  private _isMessengerLocked: boolean = false;
+  private _activeUsers: string = "[]";
 
-  constructor(
-    documentName: string,
-    userName: string,
-    errorCallback: (error: string) => void
-  ) {
+  constructor(documentName: string, userName: string, errorCallback: (error: string) => void) {
     this._userName = userName;
     this._documentName = documentName;
 
@@ -178,10 +177,7 @@ class SpreadSheetClient {
     }
     const columns = this._document.columns;
     const rows = this._document.rows;
-    const cells: Map<string, CellTransport> = this._document.cells as Map<
-      string,
-      CellTransport
-    >;
+    const cells: Map<string, CellTransport> = this._document.cells as Map<string, CellTransport>;
     const sheetDisplayStrings: string[][] = [];
     // create a 2d array of strings that is [row][column]
 
@@ -192,8 +188,7 @@ class SpreadSheetClient {
         const cell = cells.get(cellName) as CellTransport;
         if (cell) {
           // add the cell value and the editing status
-          sheetDisplayStrings[row][column] =
-            this._getCellValue(cell) + "|" + cell.editing;
+          sheetDisplayStrings[row][column] = this._getCellValue(cell) + "|" + cell.editing;
         } else {
           throw new Error(`cell ${cellName} not found`);
         }
@@ -252,6 +247,90 @@ class SpreadSheetClient {
       .then((document: DocumentTransport) => {
         this._updateDocument(document);
       });
+  }
+
+  
+  /** Returns the locked status of the sheet. */
+  public get isSheetLocked(): boolean {
+    return this._isSheetLocked;
+  }
+
+  /** Sets the locked status of the sheet (currently unused). */
+  public set isSheetLocked(value: boolean) {
+    // Implementation here if needed
+  }
+
+    /** Returns the locked status of the sheet. */
+    public get activeUsers (): string {
+      return this._activeUsers;
+    }
+  
+    /** Sets the locked status of the sheet (currently unused). */
+    public set activeUsers(value: string) {
+      // Implementation here if needed
+      this._activeUsers = value;
+    }
+
+    public updateActiveUsers(newUser: string){
+      // sets spreadsheet's active users value - TODO
+      // needs to communicate with backend to store value for users somewhre 
+
+      
+      let value = this._activeUsers; // Assume this is a comma-separated string of user:timestamp
+      let currentTime = new Date().getTime();
+      let thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
+    
+      // Deserialize the string to an array of user objects
+      let users = value.split(",").map(u => {
+        let [username, timestamp] = u.split(":");
+        return { username, timestamp: parseInt(timestamp) };
+      });
+    
+      // Remove users with old timestamps and update timestamp if user exists
+      users = users.filter(user => {
+        if(user.username === newUser) {
+          user.timestamp = currentTime; // Update timestamp
+          return true;
+        }
+        return currentTime - user.timestamp < thirtyMinutes;
+      });
+    
+      // If newUser is not in the list, add it
+      if (!users.some(u => u.username === newUser)) {
+        users.push({ username: newUser, timestamp: currentTime });
+      }
+    
+      // Serialize back to string
+      this._activeUsers = users.map(u => `${u.username}:${u.timestamp}`).join(",");
+    }
+    
+
+
+  /** Sets the locked status of the sheet with an additional token check. */
+  public isSheetLockedAdmin(value: boolean, token: boolean): void {
+    if (token) {
+      this._isSheetLocked = value;
+    }
+  }
+
+
+
+
+  /** Returns the locked status of the messenger. */
+  public get isMessengerLocked(): boolean {
+    return this._isMessengerLocked;
+  }
+
+  /** Sets the locked status of the messenger (currently unused). */
+  public set isMessengerLocked(value: boolean) {
+    // Implementation here if needed
+  }
+
+  /** Sets the locked status of the messenger with an additional token check. */
+  public isMessengerLockedAdmin(value: boolean, token: boolean): void {
+    if (token) {
+      this._isMessengerLocked = value;
+    }
   }
 
   public addToken(token: string): void {
@@ -405,10 +484,7 @@ class SpreadSheetClient {
       });
   }
 
-  private _getEditorString(
-    contributingUsers: UserEditing[],
-    cellLabel: string
-  ): string {
+  private _getEditorString(contributingUsers: UserEditing[], cellLabel: string): string {
     for (let user of contributingUsers) {
       if (user.cell === cellLabel) {
         return user.user;
