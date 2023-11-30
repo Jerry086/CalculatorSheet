@@ -3,6 +3,7 @@ import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
 import bcrypt from 'bcryptjs';
 import ChatClient from '../Engine/ChatClient';
+import { UsersContainer } from '../Engine/GlobalDefinitions';
 
 
 /**
@@ -39,6 +40,8 @@ interface SheetsDataType {
   [key: string]: SheetData;
 }
 
+const chatClientInstance = new ChatClient();
+const baseUrl = chatClientInstance.getBaseURL();
 
 function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element {
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
@@ -46,6 +49,9 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   const [isAdminKey, setIsAdminKey] = useState(window.sessionStorage.getItem('isAdminKey') || "");
   const [documents, setDocuments] = useState<string[]>([]);
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
+  const [usersContainer, setusersContainer] = useState<UsersContainer>();
+  const [isChatLocked, setIsChatLocked] = useState(false);
+  
 
 
 
@@ -74,8 +80,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
       <div className="toolbar">
         <button >Lock All</button> 
         <button >Unlock All</button> 
-        <button >Mute Chat</button>
-        <button >Unmute Chat</button>
+        <button onClick={handleMuteChat}>Mute Chat</button>
+        <button onClick={handleUnmuteChat}>Unmute Chat</button>
       </div>
     );
     //TODO ADD METHODS
@@ -83,6 +89,53 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
     //  onClick={console.log("unlockAll") }
     //  onClick={console.log("muteChat")}
     // onClick={console.log("unmuteChat")}
+  }
+
+  async function handleMuteChat() {
+    try {
+      //const chatClientInstance = new ChatClient();
+      //const baseUrl = chatClientInstance.getBaseURL();
+      const response = await fetch(`${baseUrl}/messages/lockAll`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ admin: userName }),
+      });
+
+      if (response.ok) {
+        setIsChatLocked(true);
+        console.log("chat locked");
+      } else {
+        throw new Error(`Error muting chat: ${response.status}`);
+      }
+    } catch (error) {
+      // Handle any errors that occurred during the backend calls
+      return { error: "Mute chat error: " + (error instanceof Error ? error.message : "Unknown error") };
+    }
+  }
+
+  async function handleUnmuteChat() {
+    try {
+      //const chatClientInstance = new ChatClient();
+      //const baseUrl = chatClientInstance.getBaseURL();
+      const response = await fetch(`${baseUrl}/messages/unlockAll`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ admin: userName }),
+      });
+
+      if (response.ok) {
+        setIsChatLocked(false);
+      } else {
+        throw new Error(`Error unmuting chat: ${response.status}`);
+      }
+    } catch (error) {
+      // Handle any errors that occurred during the backend calls
+      return { error: "Unmute chat error: " + (error instanceof Error ? error.message : "Unknown error") };
+    }
   }
     
 // fetches extra info for admin users -TODO
@@ -141,6 +194,57 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 
   }
 
+  // Fuction to get all active users
+  async function getActiveUsers() {
+    try {
+      // Simulate a backend request (replace with actual fetch or axios call)
+      //const chatClientInstance = new ChatClient();
+      //const baseUrl = chatClientInstance.getBaseURL();
+      const response = await fetch(`${baseUrl}/user`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const usersContainer: UsersContainer = await response.json();
+        setusersContainer(usersContainer);
+        console.log(JSON.stringify(usersContainer));
+        return usersContainer;
+        // return true;
+      } else {
+        throw new Error(`Error fetching users: ${response.status}`);
+      }
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error fetching users");
+    }
+  }
+      
+
+
+  // Function to register a user (replace with actual backend implementation)
+  async function registerUser(userName: string): Promise<boolean> {
+    // Simulate a backend request (replace with actual fetch or axios call)
+    //const chatClientInstance = new ChatClient();
+    //const baseUrl = chatClientInstance.getBaseURL();
+    const response = await fetch(`${baseUrl}/user/${userName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userName: userName }),
+    });
+    const responseText = await response.text();
+    if (response.status === 200) {
+      return true;
+    } else {
+      return false;
+      //return { error: "Backend error: " + responseText };
+    }
+  }
+
   //updated login funtion - for admin name request login info
   // need to write back end and way to set admin names todo
   async function handleLogin() {
@@ -153,10 +257,13 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
       }
 
       try {
-        //const loginResponse = dummyLoginCall(userName);
-      const loginResponse = await loginCall(userName); //change to this when backend is ready
-      // TODO
-  
+      // first register user, the promote Admin user.
+      const registerUserResponse = await registerUser(userName);
+      //const loginResponse = dummyLoginCall(userName);
+      const loginResponse = await loginCall(userName);
+    
+    // TODO
+
       if ('error' in loginResponse) {
         alert(loginResponse.error);
         return;
@@ -219,8 +326,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 // Function to check if the password is correct (replace with actual backend implementation)
 async function backendCheckPassword(userName: string, encryptedPassword: string): Promise<boolean> {
   // Simulate a backend request (replace with actual fetch or axios call)
-  const chatClientInstance = new ChatClient();
-  const baseUrl = chatClientInstance.getBaseURL();
+  //const chatClientInstance = new ChatClient();
+  //const baseUrl = chatClientInstance.getBaseURL();
   const response = await fetch(`${baseUrl}/user/promote`, {
     method: 'PUT',
     headers: {
@@ -228,15 +335,15 @@ async function backendCheckPassword(userName: string, encryptedPassword: string)
     },
     body: JSON.stringify({ userName: userName, password: encryptedPassword }),
   });
-  console.log(encryptedPassword);
+  //console.log(encryptedPassword);
 
   // Assuming the backend returns a JSON object with a 'isPasswordCorrect' property
   //const result = await response.json();
   
   const responseText = await response.text();
-  console.log(responseText);
-  const contentType = response.headers.get('Content-Type');
-  console.log(contentType);
+  //console.log(responseText);
+  //const contentType = response.headers.get('Content-Type');
+  //console.log(contentType);
   // if the response is 200 then the password is correct
   // if the response is error then the password is incorrect
   if (response.status === 200) {
@@ -251,10 +358,10 @@ async function hashPassword(password: string) {
 
   try {
     const hash = await bcrypt.hash(password, saltRounds);
-    console.log('Hash to store:', hash);
+    //console.log('Hash to store:', hash);
     return hash;
   } catch (error) {
-    console.error(error);
+    //console.error(error);
     throw error;
   }
 }
@@ -265,7 +372,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
     const password = prompt("Please enter your password");
 
     if (password != null && password !== "") {
-      console.log("password is " + password);
+      //console.log("password is " + password);
 
         const encryptedPassword = await hashPassword(password)
 
@@ -460,8 +567,8 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
   function loginPage() {
 
     //console.log("username & isadmin are ");
-    userName && console.log(userName);
-    isAdmin && console.log(isAdmin);
+    //userName && console.log(userName);
+    //isAdmin && console.log(isAdmin);
 
     return <table>
 

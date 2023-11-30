@@ -159,6 +159,7 @@ class UserController {
       }
     );
     this.users[index].isAdmin = true;
+    //console.log(JSON.stringify(this.users));
     return true;
   }
 
