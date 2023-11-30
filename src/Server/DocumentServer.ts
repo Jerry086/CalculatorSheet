@@ -95,6 +95,7 @@ app.post("/user/:userName", (req: express.Request, res: express.Response) => {
   }
   userController.addUser(userName);
   const users = userController.getAllUsers();
+  //console.log(JSON.stringify(users));
 
   res.status(200).send(users);
 });
@@ -124,6 +125,7 @@ app.put("/user/promote", (req: express.Request, res: express.Response) => {
     });
   }
   const users = userController.getAllUsers();
+  //console.log(JSON.stringify(users));
   //res.status(200).send(users);
   res.status(200).json(users);
 });

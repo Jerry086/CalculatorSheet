@@ -3,6 +3,7 @@ import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
 import bcrypt from 'bcryptjs';
 import ChatClient from '../Engine/ChatClient';
+import { UsersContainer } from '../Engine/GlobalDefinitions';
 
 
 /**
@@ -46,6 +47,7 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   const [isAdminKey, setIsAdminKey] = useState(window.sessionStorage.getItem('isAdminKey') || "");
   const [documents, setDocuments] = useState<string[]>([]);
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
+  const [usersContainer, setusersContainer] = useState<UsersContainer>();
 
 
 
@@ -141,6 +143,57 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 
   }
 
+  // Fuction to get all active users
+  async function getActiveUsers() {
+    try {
+      // Simulate a backend request (replace with actual fetch or axios call)
+      const chatClientInstance = new ChatClient();
+      const baseUrl = chatClientInstance.getBaseURL();
+      const response = await fetch(`${baseUrl}/user`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const usersContainer: UsersContainer = await response.json();
+        setusersContainer(usersContainer);
+        console.log(JSON.stringify(usersContainer));
+        return usersContainer;
+        // return true;
+      } else {
+        throw new Error(`Error fetching users: ${response.status}`);
+      }
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error fetching users");
+    }
+  }
+      
+
+
+  // Function to register a user (replace with actual backend implementation)
+  async function registerUser(userName: string): Promise<boolean> {
+    // Simulate a backend request (replace with actual fetch or axios call)
+    const chatClientInstance = new ChatClient();
+    const baseUrl = chatClientInstance.getBaseURL();
+    const response = await fetch(`${baseUrl}/user/${userName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userName: userName }),
+    });
+    const responseText = await response.text();
+    if (response.status === 200) {
+      return true;
+    } else {
+      return false;
+      //return { error: "Backend error: " + responseText };
+    }
+  }
+
   //updated login funtion - for admin name request login info
   // need to write back end and way to set admin names todo
   async function handleLogin() {
@@ -153,10 +206,13 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
       }
 
       try {
-        //const loginResponse = dummyLoginCall(userName);
-      const loginResponse = await loginCall(userName); //change to this when backend is ready
-      // TODO
-  
+      // first register user, the promote Admin user.
+      const registerUserResponse = await registerUser(userName);
+      //const loginResponse = dummyLoginCall(userName);
+      const loginResponse = await loginCall(userName);
+    
+    // TODO
+
       if ('error' in loginResponse) {
         alert(loginResponse.error);
         return;
