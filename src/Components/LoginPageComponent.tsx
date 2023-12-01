@@ -52,6 +52,7 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
   const [usersContainer, setusersContainer] = useState<UsersContainer>();
   const [isChatLocked, setIsChatLocked] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<string[]>([]);
 
   const baseUrl = spreadSheetClient.getBaseURL();
   
@@ -530,11 +531,19 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
                     <input
                       type="checkbox"
                       onChange={(e) => {
-                        setSheetsData({
-                          ...sheetsData,
-                          [sheetName]: { ...sheet, isUnlocked: !sheet.isUnlocked }
-                        });
-                        e.target.style.borderColor = 'red'; // indicate unsaved change
+                        // setSheetsData({
+                        //   ...sheetsData,
+                        //   [sheetName]: { ...sheet, isUnlocked: !sheet.isUnlocked }
+                        // });
+                        // e.target.style.borderColor = 'red'; // indicate unsaved change
+                        const newSelectedDocument = [...selectedDocument];
+                        const index = newSelectedDocument.indexOf(sheetName);
+                        if (index === -1) {
+                          newSelectedDocument.push(sheetName);
+                        } else {
+                          newSelectedDocument.splice(index, 1);
+                        }
+                        setSelectedDocument(newSelectedDocument);
                       }}
                     /> 
                     <span>{!sheet.isUnlocked && "🔒"  }</span>
