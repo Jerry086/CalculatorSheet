@@ -60,17 +60,16 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   useEffect(() => {
     const interval = setInterval(() => {
       const sheets = spreadSheetClient.getSheets();
+      const data = spreadSheetClient.getSheetsProps();
+      const sheetData: SheetsDataType = {};
+      data.forEach((sheet) => {
+        sheetData[sheet.documentName] = { isUnlocked: sheet.isUnlocked, activeUsers: sheet.activeUsers };
+      })
+      setSheetsData(sheetData);
       if (sheets.length > 0) {
         setDocuments(sheets);
       }
     }, 50);
-
-    const sheets = spreadSheetClient.getSheets();
-    const data = dummyGetSpreadSheetData(sheets);
-    setSheetsData(data);
-
-
-
     return () => clearInterval(interval);
   });
 
@@ -84,11 +83,6 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
         <button onClick={handleUnmuteChat}>Unmute Chat</button>
       </div>
     );
-    //TODO ADD METHODS
-    // onClick={console.log("lockAll")}
-    //  onClick={console.log("unlockAll") }
-    //  onClick={console.log("muteChat")}
-    // onClick={console.log("unmuteChat")}
   }
 
 

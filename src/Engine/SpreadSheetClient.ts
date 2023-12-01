@@ -36,6 +36,7 @@ class SpreadSheetClient {
   private _document: DocumentTransport;
   private _server: string = "";
   private _documentList: string[] = [];
+  private _documentProps: any[] = [];
   private _errorCallback: (error: string) => void = () => {};
 
   constructor(
@@ -61,6 +62,7 @@ class SpreadSheetClient {
 
     console.log(`process.env = ${JSON.stringify(process.env)}`);
     this.getDocuments(this._userName);
+    this.getDocumentPros();
   }
 
   private _initializeBlankDocument(): DocumentTransport {
@@ -99,19 +101,19 @@ class SpreadSheetClient {
    */
 
   private async _timedFetch(): Promise<Response> {
-    // only get the document list every 2 seconds
-    let documentListInterval = 20;
-    let documentFetchCount = 0;
+    // only get the document list every 0.5 seconds
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        this.getDocument(this._documentName, this._userName);
-        documentFetchCount++;
-        if (documentFetchCount > documentListInterval) {
-          documentFetchCount = 0;
-          this.getDocuments(this._userName);
-        }
+        // this.getDocument(this._documentName, this._userName);
+        // documentFetchCount++;
+        // if (documentFetchCount > documentListInterval) {
+        //   documentFetchCount = 0;
+        //   this.getDocuments(this._userName);
+        // }
+        this.getDocuments(this._userName);
+        this.getDocumentPros();
         this._timedFetch();
-      }, 100);
+      }, 500);
     });
   }
 
@@ -166,6 +168,10 @@ class SpreadSheetClient {
 
   getSheets(): string[] {
     return this._documentList;
+  }
+
+  getSheetsProps(): any[] {
+    return this._documentProps;
   }
 
   // Interim solution for pushing the editing data through to the GUI
@@ -405,6 +411,17 @@ class SpreadSheetClient {
       });
   }
 
+  public getDocumentPros() {
+    const fetchURL = `${this._baseURL}/documents/props`;
+    fetch(fetchURL)
+      .then((response) => {
+        return response.json() as Promise<any[]>;
+      })
+      .then((documentsProp: any[]) => {
+        this._updateDocumentPros(documentsProp);
+      });
+  }
+
   private _getEditorString(
     contributingUsers: UserEditing[],
     cellLabel: string
@@ -419,6 +436,10 @@ class SpreadSheetClient {
 
   private _updateDocumentList(documents: string[]): void {
     this._documentList = documents;
+  }
+
+  private _updateDocumentPros(documentsProp: any[]): void {
+    this._documentProps = documentsProp;
   }
 
   private _updateDocument(document: DocumentTransport): void {

@@ -166,6 +166,19 @@ export class SpreadSheetController {
     // this._contributingUsers.delete(user);
   }
 
+  getProps() {
+    const isUnlocked = this._lockedSheetUsers.length === 0;
+    // add contributing users's key to the result.activeUsers
+    const activeUsers: string[] = [];
+    this._contributingUsers.forEach((value: ContributingUser, key: string) => {
+      activeUsers.push(key);
+    });
+    return {
+      isUnlocked: isUnlocked,
+      activeUsers: activeUsers,
+    };
+  }
+
   /**
    * lock the users out of the sheet
    */

@@ -172,6 +172,12 @@ app.get("/documents", (req: express.Request, res: express.Response) => {
   res.send(documentNames);
 });
 
+// get a list of documents, lock status and active users
+app.get("/documents/props", (req: express.Request, res: express.Response) => {
+  const documentProps = documentHolder.getDocumentProps();
+  res.send(documentProps);
+});
+
 // add a user to a document for viewing
 // userName is in the document body
 app.put("/documents/:name", (req: express.Request, res: express.Response) => {
