@@ -55,24 +55,21 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   const [selectedDocument, setSelectedDocument] = useState<string[]>([]);
 
   const baseUrl = spreadSheetClient.getBaseURL();
-  
-
-
 
   // SpreadSheetClient is fetching the documents from the server so we should
   // check every 1/20 of a second to see if the documents have been fetched
   useEffect(() => {
     const interval = setInterval(() => {
-      const sheets = spreadSheetClient.getSheets();
+      // const sheets = spreadSheetClient.getSheets();
       const data = spreadSheetClient.getSheetsProps();
-      const sheetData: SheetsDataType = {};
+      const newSheetsData: SheetsDataType = {};
       data.forEach((sheet) => {
-        sheetData[sheet.documentName] = { isUnlocked: sheet.isUnlocked, activeUsers: sheet.activeUsers };
+        newSheetsData[sheet.documentName] = { isUnlocked: sheet.isUnlocked, activeUsers: sheet.activeUsers };
       })
-      setSheetsData(sheetData);
-      if (sheets.length > 0) {
-        setDocuments(sheets);
-      }
+      setSheetsData(newSheetsData);
+      // if (sheets.length > 0) {
+      //   setDocuments(sheets);
+      // }
     }, 50);
     return () => clearInterval(interval);
   });
@@ -91,65 +88,62 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
 
 
   async function handleLockSheets() {
-    for (const sheetName in sheetsData) {
-      if (sheetsData.hasOwnProperty(sheetName)) {
-        const sheet = sheetsData[sheetName];
-        if (!sheet.isUnlocked) {
-          // send request to backend to lock sheet
-          try {
-            const response = await fetch(`${baseUrl}/document/lock/${sheetName}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ admin: userName }),
-            });
-      
-            if (response.ok) {
-              console.log("%s unlocked", sheetName);
-            } else {
-              throw new Error(`Error locking sheets: ${response.status}`);
-            }
-          } catch (error) {
-            // Handle any errors that occurred during the backend calls
-            return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
-          }
+    for(let i = 0; i < selectedDocument.length; i++) {
+      const documentName = selectedDocument[i];
+      // send request to backend to lock sheet
+      try {
+        const response = await fetch(`${baseUrl}/document/lock/${documentName}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ admin: userName }),
+        });
+  
+        if (response.ok) {
+          const newSheetsData = { ...sheetsData };
+          newSheetsData[documentName].isUnlocked = false;
+          setSheetsData((newSheetsData) => {
+            console.log("%s locked", documentName, newSheetsData[documentName].isUnlocked.toString());
+            return newSheetsData;
+          });
         } else {
-          // do nothing
+          throw new Error(`Error locking sheets: ${response.status}`);
         }
+      } catch (error) {
+        // Handle any errors that occurred during the backend calls
+        alert(error);
+        return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
       }
     }
   }
 
   async function handleUnlockSheets() {
-    for (const sheetName in sheetsData) {
-      if (sheetsData.hasOwnProperty(sheetName)) {
-        const sheet = sheetsData[sheetName];
-        if (sheet.isUnlocked) {
+    for(let i = 0; i < selectedDocument.length; i++) {
+      const documentName = selectedDocument[i];
           // send request to backend to unlock sheet
-          try {
-            const response = await fetch(`${baseUrl}/document/unlock/${sheetName}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ admin: userName }),
-            });
-      
-            if (response.ok) {
-              console.log("%s unlocked", sheetName);
-            } else {
-              throw new Error(`Error locking sheets: ${response.status}`);
-            }
-          } catch (error) {
-            // Handle any errors that occurred during the backend calls
-            return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
-          }
+      try {
+        const response = await fetch(`${baseUrl}/document/unlock/${documentName}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ admin: userName }),
+        });
+  
+        if (response.ok) {
+          const newSheetsData = { ...sheetsData };
+          newSheetsData[documentName].isUnlocked = true;
+          setSheetsData(newSheetsData);
+          console.log("%s unlocked", documentName);
         } else {
-          // do nothing
+          throw new Error(`Error locking sheets: ${response.status}`);
         }
+      } catch (error) {
+        // Handle any errors that occurred during the backend calls
+        return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
       }
-    }
+    } 
   }
 
 
@@ -522,7 +516,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
           </thead>
           <tbody>
             {Object.keys(sheetsData).map(sheetName => {
-              if(sheetName.indexOf("test1") == -1){sheetsData[sheetName].isUnlocked = false;}
+              // if(sheetName.indexOf("test1") == -1){sheetsData[sheetName].isUnlocked = false;}
               const sheet = sheetsData[sheetName];
               return (
                 <tr className="selector-item">
@@ -552,7 +546,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
                     {sheet.activeUsers.join(', ')}
                   </td>
                   <td>
-                    <button onClick={() => loadDocument(sheetName)}>Edit</button>
+                    <button onClick={() => loadDocument(sheetName)}>Open</button>
                   </td>
                 </tr>
               );
