@@ -101,19 +101,20 @@ class SpreadSheetClient {
    */
 
   private async _timedFetch(): Promise<Response> {
+    let documentFetchCount = 0;
+    const documentListInterval = 20;
     // only get the document list every 0.5 seconds
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // this.getDocument(this._documentName, this._userName);
-        // documentFetchCount++;
-        // if (documentFetchCount > documentListInterval) {
-        //   documentFetchCount = 0;
-        //   this.getDocuments(this._userName);
-        // }
-        this.getDocuments(this._userName);
-        this.getDocumentPros();
+        this.getDocument(this._documentName, this._userName);
+        documentFetchCount++;
+        if (documentFetchCount > documentListInterval) {
+          documentFetchCount = 0;
+          this.getDocuments(this._userName);
+          this.getDocumentPros();
+        }
         this._timedFetch();
-      }, 500);
+      }, 100);
     });
   }
 
@@ -504,6 +505,11 @@ class SpreadSheetClient {
 
     this.getDocument(this._documentName, this._userName);
     this._server = server;
+  }
+
+  // Add a public method to get the _baseURL
+  public getBaseURL(): string {
+    return this._baseURL;
   }
 }
 

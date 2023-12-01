@@ -7,13 +7,10 @@ import ChatClient from "../Engine/ChatClient";
 
 interface ChatComponentProps {
   userName: string;
+  chatClient: ChatClient;
 }
 
-
-
-const chatClient = new ChatClient();
-
-const ChatComponent: React.FC<ChatComponentProps> = ({ userName }) => {
+const ChatComponent: React.FC<ChatComponentProps> = ({ userName, chatClient }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messageList, setMessageList] = useState<MessageContainer[]>([]);

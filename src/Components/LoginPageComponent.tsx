@@ -20,6 +20,7 @@ import { spread } from 'axios';
 
 interface LoginPageProps {
   spreadSheetClient: SpreadSheetClient;
+  chatClient: ChatClient;
 }
 interface LoginResponse {
   username: string;
@@ -40,10 +41,10 @@ interface SheetsDataType {
   [key: string]: SheetData;
 }
 
-const chatClientInstance = new ChatClient();
-const baseUrl = chatClientInstance.getBaseURL();
+// const chatClientInstance = new ChatClient();
+// const baseUrl = chatClientInstance.getBaseURL();
 
-function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element {
+function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps): JSX.Element {
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
   const [isAdmin, setIsAdmin] = useState(window.sessionStorage.getItem('isAdmin') === 'true');
   const [isAdminKey, setIsAdminKey] = useState(window.sessionStorage.getItem('isAdminKey') || "");
@@ -51,6 +52,8 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
   const [usersContainer, setusersContainer] = useState<UsersContainer>();
   const [isChatLocked, setIsChatLocked] = useState(false);
+
+  const baseUrl = spreadSheetClient.getBaseURL();
   
 
 
@@ -150,50 +153,27 @@ function  LoginPageComponent({ spreadSheetClient }: LoginPageProps): JSX.Element
 
 
   async function handleMuteChat() {
-    try {
-      //const chatClientInstance = new ChatClient();
-      //const baseUrl = chatClientInstance.getBaseURL();
-      const response = await fetch(`${baseUrl}/messages/lockAll`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ admin: userName }),
-      });
-
-      if (response.ok) {
-        setIsChatLocked(true);
-        console.log("chat locked");
-      } else {
-        throw new Error(`Error muting chat: ${response.status}`);
-      }
-    } catch (error) {
-      // Handle any errors that occurred during the backend calls
-      return { error: "Mute chat error: " + (error instanceof Error ? error.message : "Unknown error") };
-    }
+      const res = chatClient.muteAllUsers(userName);
+      res.then((res) => {
+        if (res) {
+          setIsChatLocked(true);
+          console.log("chat locked");
+        } else{
+          alert(`Error muting chat`);
+        }
+      })
   }
 
   async function handleUnmuteChat() {
-    try {
-      //const chatClientInstance = new ChatClient();
-      //const baseUrl = chatClientInstance.getBaseURL();
-      const response = await fetch(`${baseUrl}/messages/unlockAll`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ admin: userName }),
-      });
-
-      if (response.ok) {
+    const res = chatClient.unmuteAllUsers(userName);
+    res.then((res) => {
+      if (res) {
         setIsChatLocked(false);
-      } else {
-        throw new Error(`Error unmuting chat: ${response.status}`);
+        console.log("chat unlocked");
+      } else{
+        alert(`Error muting chat`);
       }
-    } catch (error) {
-      // Handle any errors that occurred during the backend calls
-      return { error: "Unmute chat error: " + (error instanceof Error ? error.message : "Unknown error") };
-    }
+    })
   }
     
 // fetches extra info for admin users -TODO

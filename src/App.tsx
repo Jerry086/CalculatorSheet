@@ -7,6 +7,7 @@ import './App.css';
 import SpreadSheet from './Components/SpreadSheet';
 import SpreadSheetClient from './Engine/SpreadSheetClient';
 import LoginPageComponent from './Components/LoginPageComponent';
+import ChatClient from './Engine/ChatClient';
 
 function displayErrorMessage(message: string) {
   alert(message);
@@ -17,6 +18,7 @@ function App() {
 
   const [documentName, setDocumentName] = useState(getDocumentNameFromWindow());
   const spreadSheetClient = new SpreadSheetClient('documents', '', displayErrorMessage);
+  const chatClient = new ChatClient();
   //const memoryUsage = process.memoryUsage();
   useEffect(() => {
     if (window.location.href) {
@@ -76,7 +78,7 @@ function App() {
     return (
       <div className="LoginPage">
         <header className="Login-header">
-          <LoginPageComponent spreadSheetClient={spreadSheetClient} />
+          <LoginPageComponent spreadSheetClient={spreadSheetClient} chatClient={chatClient} />
         </header>
       </div>
     )
@@ -85,7 +87,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <SpreadSheet documentName={documentName} spreadSheetClient={spreadSheetClient} />
+        <SpreadSheet documentName={documentName} spreadSheetClient={spreadSheetClient} 
+        chatClient={chatClient}/>
       </header>
 
     </div>
