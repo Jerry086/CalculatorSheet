@@ -103,6 +103,20 @@ function lockItems() {
 
 }
 
+
+function lockSpreadSheet() {
+  spreadSheetClient.isSheetLockedAdmin(!isSheetLocked!, true)
+  setisSheetLocked(spreadSheetClient.isSheetLocked);
+
+}
+
+
+function lockMessenger() {
+  spreadSheetClient.isMessengerLockedAdmin(!isMessengerLocked!, true)
+  setisMessengerLocked(spreadSheetClient.isMessengerLocked);
+
+}
+
 function pingActive() {
   //sends an I'm alive call to the server.
   spreadSheetClient.updateActiveUsers(userName);

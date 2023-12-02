@@ -11,9 +11,10 @@ interface KeyPadProps {
   onButtonClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onCommandButtonClick: (text: string) => void;
   currentlyEditing: boolean;
+  isLocked: boolean;
 } // interface KeyPadProps
 
-function KeyPad({ onButtonClick, onCommandButtonClick, currentlyEditing }: KeyPadProps) {
+function KeyPad({ onButtonClick, onCommandButtonClick, currentlyEditing , isLocked}: KeyPadProps) {
 
   // the done button has two styles and two text values depending on currently Editing
   // if currentlyEditing is true then the button will have the class button-edit-end
@@ -32,7 +33,7 @@ function KeyPad({ onButtonClick, onCommandButtonClick, currentlyEditing }: KeyPa
   // the buttons use one of three classes
   // numberButton, operatorButton, and otherButton
   return (
-    <div className="buttons">
+    <div className={`buttons  ${isLocked ? "locked-button" : "not-locked-button"}`}>
       <div className="buttons-row">
 
 

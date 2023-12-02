@@ -1,0 +1,6 @@
+.locked-button{
+
+    opacity: 0.6; /* Lower opacity for disabled look */
+    border-color: grey; /* Grey border to indicate disabled state */
+    pointer-events: none; /* Disables interaction with the chat */
+}
