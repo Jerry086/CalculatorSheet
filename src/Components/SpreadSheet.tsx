@@ -35,6 +35,7 @@ function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadShee
   const [currentlyEditing, setCurrentlyEditing] = useState(spreadSheetClient.getEditStatus());
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
   const [serverSelected, setServerSelected] = useState("localhost");
+  const [isLocked, setIsLocked] = useState(false);
 
 
   function updateDisplayValues(): void {
@@ -55,6 +56,16 @@ function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadShee
     }, 50);
     return () => clearInterval(interval);
   });
+
+
+  function lockItems() {
+    //todo fake logic -  call actual backend - same as login page
+    console.log("called lockItems - isLocked is", isLocked);
+    setIsLocked(!isLocked);
+    console.log("finished lockItems - isLocked is", isLocked);
+  
+  }
+
 
   function returnToLoginPage() {
 
@@ -195,13 +206,19 @@ function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadShee
           onClick={onCellClick}
           currentCell={currentCell}
           currentlyEditing={currentlyEditing} ></SheetHolder>}
-        <KeyPad onButtonClick={onButtonClick}
+        <KeyPad 
+        isLocked={isLocked} //TODO some param from backend
+        
+        onButtonClick={onButtonClick}
           onCommandButtonClick={onCommandButtonClick}
           currentlyEditing={currentlyEditing}></KeyPad>
         <ServerSelector serverSelector={serverSelector} serverSelected={serverSelected} />
         <button onClick={returnToLoginPage} className="returnToLoginButton">Return to Login Page</button>
+        <button onClick={lockItems} className="returnToLoginButton">Lock items</button>
+
       </div>
-      {userName && <ChatComponent userName={userName} chatClient={chatClient}/>}
+      {userName && <ChatComponent  userName={userName} chatClient={chatClient}  isLocked={isLocked} // //TODO some param from backend
+      />}
     </div>
 
   )
