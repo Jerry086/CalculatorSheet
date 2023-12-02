@@ -171,6 +171,36 @@ class ChatClient {
       });
   }
 
+  async muteAllUsers(userName: string): Promise<boolean> {
+    const url = `${this._baseURL}/messages/lockAll`;
+    const response = await fetch(`${url}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ admin: userName }),
+    });
+    if (response.ok) {
+      return true;
+    }
+    return false;
+  }
+
+  async unmuteAllUsers(userName: string): Promise<boolean> {
+    const url = `${this._baseURL}/messages/unlockAll`;
+    const response = await fetch(`${url}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ admin: userName }),
+    });
+    if (response.ok) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Server selector for the fetch
    */

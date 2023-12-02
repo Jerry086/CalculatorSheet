@@ -118,6 +118,21 @@ export class DocumentHolder {
     return documentNames;
   }
 
+  public getDocumentProps(): any[] {
+    this._checkForNewDocuments();
+    const documentProps: any[] = [];
+    this._documents.forEach((document, name) => {
+      const { isUnlocked, activeUsers } = document.getProps();
+      const res = {
+        documentName: name,
+        isUnlocked: isUnlocked,
+        activeUsers: activeUsers,
+      };
+      documentProps.push(res);
+    });
+    return documentProps;
+  }
+
   public createDocument(
     name: string,
     columns: number,

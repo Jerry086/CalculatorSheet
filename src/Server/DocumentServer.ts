@@ -49,7 +49,7 @@ app.use(bodyParser.json());
 // Add a middleware function to log incoming requests
 app.use((req, res, next) => {
   if (debug) {
-    console.log(`${req.method} ${req.url}`);
+    //console.log(`${req.method} ${req.url}`);
   }
   next();
 });
@@ -170,6 +170,12 @@ app.put("/user/assign", (req: express.Request, res: express.Response) => {
 app.get("/documents", (req: express.Request, res: express.Response) => {
   const documentNames = documentHolder.getDocumentNames();
   res.send(documentNames);
+});
+
+// get a list of documents, lock status and active users
+app.get("/documents/props", (req: express.Request, res: express.Response) => {
+  const documentProps = documentHolder.getDocumentProps();
+  res.send(documentProps);
 });
 
 // add a user to a document for viewing
@@ -400,6 +406,7 @@ app.put(
   "/document/lock/:name",
   (req: express.Request, res: express.Response) => {
     const name = req.params.name;
+    console.log(`PUT /document/lock/${name}`);
     // get all document names
     const documentNames = documentHolder.getDocumentNames();
     // check if the document exists

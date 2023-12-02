@@ -6,6 +6,7 @@ import SpreadSheetClient from "../Engine/SpreadSheetClient";
 import SheetHolder from "./SheetHolder";
 import "./SpreadSheet.css"; // Import the CSS file
 import ChatComponent from './ChatComponent';
+import ChatClient from "../Engine/ChatClient";
 
 import { ButtonNames } from "../Engine/GlobalDefinitions";
 import ServerSelector from "./ServerSelector";
@@ -14,6 +15,7 @@ import ServerSelector from "./ServerSelector";
 interface SpreadSheetProps {
   documentName: string;
   spreadSheetClient: SpreadSheetClient;
+  chatClient: ChatClient;
 }
 
 /**
@@ -24,7 +26,7 @@ interface SpreadSheetProps {
 
 // create the client that talks to the backend.
 
-function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
+function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadSheetProps) {
   const [formulaString, setFormulaString] = useState(spreadSheetClient.getFormulaString())
   const [resultString, setResultString] = useState(spreadSheetClient.getResultString())
   const [cells, setCells] = useState(spreadSheetClient.getSheetDisplayStringsForGUI());
@@ -199,7 +201,7 @@ function SpreadSheet({ documentName, spreadSheetClient }: SpreadSheetProps) {
         <ServerSelector serverSelector={serverSelector} serverSelected={serverSelected} />
         <button onClick={returnToLoginPage} className="returnToLoginButton">Return to Login Page</button>
       </div>
-      {userName && <ChatComponent userName={userName}/>}
+      {userName && <ChatComponent userName={userName} chatClient={chatClient}/>}
     </div>
 
   )
