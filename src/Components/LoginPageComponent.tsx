@@ -61,16 +61,21 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   useEffect(() => {
     const interval = setInterval(() => {
       // const sheets = spreadSheetClient.getSheets();
+      console.log("before getSheetsProps");
       const data = spreadSheetClient.getSheetsProps();
       const newSheetsData: SheetsDataType = {};
       data.forEach((sheet) => {
         newSheetsData[sheet.documentName] = { isUnlocked: sheet.isUnlocked, activeUsers: sheet.activeUsers };
       })
+      
       setSheetsData(newSheetsData);
+      console.log("after setSheetsData");
+      
+      console.log(JSON.stringify(newSheetsData["test1"]));
       // if (sheets.length > 0) {
       //   setDocuments(sheets);
       // }
-    }, 50);
+    }, 500);
     return () => clearInterval(interval);
   });
 
@@ -510,7 +515,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
             <tr className="selector-title">
               <th>Document Name</th> 
               <th>Lock Status</th>
-              <th>Active Users</th>
+              
               <th>Actions</th>
             </tr>
           </thead>
@@ -542,9 +547,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
                     /> 
                     <span>{!sheet.isUnlocked && "🔒"  }</span>
                   </td>
-                  <td style={{ width: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }}  className="notLeft" title={sheet.activeUsers.join(', ')}>
-                    {sheet.activeUsers.join(', ')}
-                  </td>
+                  
                   <td>
                     <button onClick={() => loadDocument(sheetName)}>Open</button>
                   </td>
@@ -582,7 +585,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
         </thead>
         <tbody>
           {sheets.map((sheet) => {
-              if(sheetsData && sheet.indexOf("test1") == -1 && sheetsData[sheet]){sheetsData[sheet].isUnlocked = false;} // todo dummy data
+              //if(sheetsData && sheet.indexOf("test1") == -1 && sheetsData[sheet]){sheetsData[sheet].isUnlocked = false;} // todo dummy data
              const sheet1 = sheetsData[sheet]; 
             return <tr className="selector-item">
               <td  >{sheet}    <span>{sheet1 && !sheet1.isUnlocked && "🔒"  }</span></td>
