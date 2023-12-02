@@ -60,22 +60,25 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   // check every 1/20 of a second to see if the documents have been fetched
   useEffect(() => {
     const interval = setInterval(() => {
+      
       // const sheets = spreadSheetClient.getSheets();
-      console.log("before getSheetsProps");
-      const data = spreadSheetClient.getSheetsProps();
+      // console.log("before getSheetsProps");
+
+      let data = spreadSheetClient.getSheetsProps();
+      // console.log("data from backend is ", data[0].documentName, "is", data[0].isUnlocked)
       const newSheetsData: SheetsDataType = {};
       data.forEach((sheet) => {
         newSheetsData[sheet.documentName] = { isUnlocked: sheet.isUnlocked, activeUsers: sheet.activeUsers };
       })
       
       setSheetsData(newSheetsData);
-      console.log("after setSheetsData");
+      // console.log("after setSheetsData");
       
       console.log(JSON.stringify(newSheetsData["test1"]));
       // if (sheets.length > 0) {
       //   setDocuments(sheets);
       // }
-    }, 500);
+    }, 100);
     return () => clearInterval(interval);
   });
 
@@ -83,10 +86,10 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   function buildToolbar() {
     return (
       <div className="toolbar">
-        <button onClick={handleLockSheets}>Lock All</button> 
-        <button onClick={handleUnlockSheets}>Unlock All</button> 
-        <button onClick={handleMuteChat}>Mute Chat</button>
-        <button onClick={handleUnmuteChat}>Unmute Chat</button>
+        <button title="Lock all Checked Spreadsheets" onClick={handleLockSheets}>Lock All</button> 
+        <button  title="Unlock all Checked Spreadsheets"  onClick={handleUnlockSheets}>Unlock All</button> 
+        <button  title="Mute Messenger for all Spreadsheets"   onClick={handleMuteChat}>Mute Chat</button>
+        <button title="Unmute Messenger for all Spreadsheets"  onClick={handleUnmuteChat}>Unmute Chat</button>
       </div>
     );
   }
@@ -556,7 +559,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
             })}
           </tbody>
         </table>
-        <button onClick={handleSubmitDummy}>Submit</button>
+        {/* <button onClick={handleSubmitDummy}>Submit</button> */}
       </div>
     );
   }

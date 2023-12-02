@@ -101,17 +101,23 @@ class SpreadSheetClient {
    */
 
   private async _timedFetch(): Promise<Response> {
+    // console.log('timedFetch ran again Outer');
     let documentFetchCount = 0;
     const documentListInterval = 20;
     // only get the document list every 0.5 seconds
     return new Promise((resolve, reject) => {
       setTimeout(() => {
+        // console.log('timedFetch ran again middle');
         this.getDocument(this._documentName, this._userName);
         documentFetchCount++;
-        if (documentFetchCount > documentListInterval) {
+        if ( true || documentFetchCount > documentListInterval) {
+          // TODO THIS IF CHECK NEEDS FIXING
           documentFetchCount = 0;
           this.getDocuments(this._userName);
           this.getDocumentPros();
+        console.log('timedFetch ran again inner');
+
+          console.log(this._documentProps);
         }
         this._timedFetch();
       }, 100);
