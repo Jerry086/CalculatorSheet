@@ -269,7 +269,6 @@ function pingActive() {
           currentlyEditing={currentlyEditing} ></SheetHolder>}
         <KeyPad 
         isLocked={isSheetLocked}
-        
         onButtonClick={onButtonClick}
           onCommandButtonClick={onCommandButtonClick}
           currentlyEditing={currentlyEditing}></KeyPad>
@@ -279,7 +278,7 @@ function pingActive() {
         <br />
         <br />
         <div>
-            {activeUsers && activeUsers.length > 0 && (
+            {/* {activeUsers && activeUsers.length > 0 && (
                 <div  style={{ border: '1px solid white', listStyleType: 'none', padding: '10px', fontSize: '18px', width: '30%' }}>
                     <p>Active Users</p>
                     <ul>
@@ -288,7 +287,7 @@ function pingActive() {
                         ))}
                     </ul>
                 </div>
-            )}
+            )} */}
         </div>
       </div>
       {userName && <ChatComponent userName={userName} isLocked={isMessengerLocked}/>}

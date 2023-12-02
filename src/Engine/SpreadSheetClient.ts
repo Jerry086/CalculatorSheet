@@ -308,6 +308,10 @@ class SpreadSheetClient {
 
   /** Sets the locked status of the sheet with an additional token check. */
   public isSheetLockedAdmin(value: boolean, token: boolean): void {
+    // call the back end with sheet name and locked status and token
+    // if the token is valid - always the case right now
+    // sets the locked status for sheetname to value
+    
     if (token) {
       this._isSheetLocked = value;
     }
