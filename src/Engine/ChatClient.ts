@@ -173,34 +173,50 @@ class ChatClient {
       });
   }
 
-  async muteAllUsers(userName: string): Promise<boolean> {
+  async muteAllUsers(userName: string) {
     const url = `${this._baseURL}/messages/lockAll`;
-    const response = await fetch(`${url}`, {
+    fetch(`${url}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ admin: userName }),
-    });
-    if (response.ok) {
-      return true;
-    }
-    return false;
+    })
+      .then((response) => response.json())
+      .then((messagesContainer: MessagesContainer) => {
+        this.chatLocked = messagesContainer.lockedChat;
+        let messages = messagesContainer.messages;
+        if (messages.length === 0) {
+          return;
+        }
+        this.insertMessages(messages);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
-  async unmuteAllUsers(userName: string): Promise<boolean> {
+  async unmuteAllUsers(userName: string) {
     const url = `${this._baseURL}/messages/unlockAll`;
-    const response = await fetch(`${url}`, {
+    fetch(`${url}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ admin: userName }),
-    });
-    if (response.ok) {
-      return true;
-    }
-    return false;
+    })
+      .then((response) => response.json())
+      .then((messagesContainer: MessagesContainer) => {
+        this.chatLocked = messagesContainer.lockedChat;
+        let messages = messagesContainer.messages;
+        if (messages.length === 0) {
+          return;
+        }
+        this.insertMessages(messages);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   /**

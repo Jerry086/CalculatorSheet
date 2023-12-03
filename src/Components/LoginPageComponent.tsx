@@ -38,8 +38,10 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   // check every 1/10 of a second to see if the documents have been updated
   useEffect(() => {
     const interval = setInterval(() => {
-      let data = spreadSheetClient.getSheetsProps();
+      const data = spreadSheetClient.getSheetsProps();
       setSheetsData(data);
+      const chatLock = chatClient.chatLocked;
+      setIsChatLocked(chatLock);
     }, 100);
     return () => clearInterval(interval);
   });
@@ -56,7 +58,6 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
     );
   }
 
-
   async function handleLockSheets() {
     selectedDocument.forEach((documentName) => {
       // send request to backend to lock sheet
@@ -71,67 +72,16 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
     });
   }
 
-
   async function handleMuteChat() {
-      const res = chatClient.muteAllUsers(userName);
-      res.then((res) => {
-        if (res) {
-          setIsChatLocked(true);
-          console.log("chat locked");
-        } else{
-          alert(`Error muting chat`);
-        }
-      })
+    chatClient.muteAllUsers(userName);
   }
 
   async function handleUnmuteChat() {
-    const res = chatClient.unmuteAllUsers(userName);
-    res.then((res) => {
-      if (res) {
-        setIsChatLocked(false);
-        console.log("chat unlocked");
-      } else{
-        alert(`Error muting chat`);
-      }
-    })
+    chatClient.unmuteAllUsers(userName);
   }
-    
-// fetches extra info for admin users -TODO
-  function dummyGetSpreadSheetData(sheets: string[]): SheetsDataType {
-    const data: SheetsDataType = {};
-  
-    // Specific sheets to modify - dummy data 
-    // replace with call to backend with isAdminKey
-    // specificSheets contains the name of locked sheets
-    const specificSheets = ['test1', 'test10.1', 'test10', 'test11', 'test12', 'test13'];
-    let index = 1;
-  
-    sheets.forEach(sheet => {
-      if (specificSheets.includes(sheet)) {
-        // For specific sheets, set isUnlocked to false and add fake usernames
-        data[sheet] = {
-          isUnlocked: false,
-          // TODO: Replace with actual active users
-          activeUsers: Array.from({ length: index++ }, (_, i) => `user${i + 1}`)
-        };
-      } else if (!data[sheet]) {
-        // For other sheets, retain existing logic
-        data[sheet] = { isUnlocked: true, activeUsers: [] };
-      }
-    });
-    
-    return data;
-  }
-    
-  // dummy function to set new state for sheets todo
-  function dummyToggleLockStatus(sheetName: string , newStatus: boolean, isAdminKey: string) {
-      // Simulate toggling the lock status
-      // This should be replaced with a real server call
-    }
-    
 
-    // old function to try and log in - used for normal users
-    function getUserLogin() {
+  // old function to try and log in - used for normal users
+  function getUserLogin() {
     return <div>
       <input
         id="userNameInput"
@@ -147,11 +97,9 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
             // setUserName(userName);
             // spreadSheetClient.userName = userName;
             handleLogin();
-
           }
         }} />
     </div>
-
   }
   // Function to register a user (replace with actual backend implementation)
   async function registerUser(userName: string): Promise<boolean> {
