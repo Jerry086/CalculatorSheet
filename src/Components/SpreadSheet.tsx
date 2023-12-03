@@ -20,11 +20,7 @@ interface SpreadSheetProps {
 
 /**
  * the main component for the Spreadsheet.  It is the parent of all the other components
- * 
- *
  * */
-
-// create the client that talks to the backend.
 
 function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadSheetProps) {
   const [formulaString, setFormulaString] = useState(spreadSheetClient.getFormulaString())
@@ -34,6 +30,7 @@ function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadShee
   const [currentCell, setCurrentCell] = useState(spreadSheetClient.getWorkingCellLabel());
   const [currentlyEditing, setCurrentlyEditing] = useState(spreadSheetClient.getEditStatus());
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
+  const [isAdmin, setIsAdmin] = useState(window.sessionStorage.getItem('isAdmin') === 'true');
   const [serverSelected, setServerSelected] = useState("localhost");
   const [isSheetLocked, setIsSheetLocked] = useState(false);
   const [isMessengerLocked, setIsMessengerLocked] = useState(false);
@@ -48,6 +45,8 @@ function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadShee
     setCells(spreadSheetClient.getSheetDisplayStringsForGUI());
     setCurrentCell(spreadSheetClient.getWorkingCellLabel());
     setCurrentlyEditing(spreadSheetClient.getEditStatus());
+    setIsSheetLocked(spreadSheetClient.getSheetLockStatus(documentName));
+    setIsMessengerLocked(chatClient.getMessengerLockStatus());
   }
 
   // useEffect to refetch the data every 1/20 of a second
@@ -58,24 +57,21 @@ function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadShee
     return () => clearInterval(interval);
   });
 
-
   function lockItemsSheet() {
-    //todo fake logic -  call actual backend - same as login page
-    console.log("called lockItemsSheet - isSheetLocked is", isSheetLocked);
-    setIsSheetLocked(!isSheetLocked);
-    console.log("finished lockItemsSheet - isSheetLocked is", isSheetLocked);
-  
+    spreadSheetClient.lockDocument(documentName, userName);
   }
 
-  
   function lockItemsMessenger() {
-    //todo fake logic -  call actual backend - same as login page
-    console.log("called lockItemsMessenger - isMessengerLocked is", isMessengerLocked);
-    setIsMessengerLocked(!isMessengerLocked);
-    console.log("finished lockItemsMessenger - isMessengerLocked is", isMessengerLocked);
+    chatClient.muteAllUsers(userName);
+  }
   
+  function unlockItemsSheet() {
+    spreadSheetClient.unlockDocument(documentName, userName);
   }
 
+  function unlockItemsMessenger() {
+    chatClient.unmuteAllUsers(userName);
+  }
 
   function returnToLoginPage() {
 
@@ -217,23 +213,23 @@ function SpreadSheet({ documentName, spreadSheetClient, chatClient }: SpreadShee
           currentCell={currentCell}
           currentlyEditing={currentlyEditing} ></SheetHolder>}
         <KeyPad 
-        isLocked={isSheetLocked} //TODO some param from backend
-        
-        onButtonClick={onButtonClick}
+          isLocked={isAdmin? false : isSheetLocked}
+          onButtonClick={onButtonClick}
           onCommandButtonClick={onCommandButtonClick}
           currentlyEditing={currentlyEditing}></KeyPad>
         <ServerSelector serverSelector={serverSelector} serverSelected={serverSelected} />
         <button onClick={returnToLoginPage} className="returnToLoginButton">Return to Login Page</button>
         <br ></br>
-        {userName === "Admin" && <div> 
-        <button onClick={lockItemsSheet} className="returnToLoginButton">Lock Sheet</button>
-        <button onClick={lockItemsMessenger} className="returnToLoginButton">Lock Messenger</button>
-        </div>
+        {isAdmin && 
+          <div> 
+            {isSheetLocked && <button onClick={unlockItemsSheet} className="returnToLoginButton">Unlock Sheet</button>}
+            {!isSheetLocked && <button onClick={lockItemsSheet} className="returnToLoginButton">Lock Sheet</button>}
+            {isMessengerLocked && <button onClick={unlockItemsMessenger} className="returnToLoginButton">Unlock Messenger</button>}
+            {!isMessengerLocked && <button onClick={lockItemsMessenger} className="returnToLoginButton">Lock Messenger</button>}
+          </div>
         }
-
-
       </div>
-      {userName && <ChatComponent  userName={userName} chatClient={chatClient}  isLocked={isMessengerLocked} // //TODO some param from backend
+      {userName && <ChatComponent  userName={userName} chatClient={chatClient}  isLocked={!isAdmin && isMessengerLocked}
       />}
     </div>
 

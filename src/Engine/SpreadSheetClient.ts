@@ -512,6 +512,14 @@ class SpreadSheetClient {
     return "";
   }
 
+  public getSheetLockStatus(documentName: string): boolean {
+    const sheetData = this._documentsProps[documentName];
+    if (sheetData) {
+      return !sheetData.isUnlocked;
+    }
+    return false;
+  }
+
   /**
    * Server selector for the fetch
    */
