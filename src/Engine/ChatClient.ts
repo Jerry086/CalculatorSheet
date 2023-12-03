@@ -22,6 +22,7 @@ class ChatClient {
   previousMessagesFetched: boolean = false;
 
   messages: MessageContainer[] = [];
+  chatLocked: boolean = false;
 
   updateDisplay: () => void = () => {};
 
@@ -103,6 +104,7 @@ class ChatClient {
     fetch(fetchURL)
       .then((response) => response.json())
       .then((messagesContainer: MessagesContainer) => {
+        this.chatLocked = messagesContainer.lockedChat;
         let messages = messagesContainer.messages;
         if (messages.length === 0) {
           return;

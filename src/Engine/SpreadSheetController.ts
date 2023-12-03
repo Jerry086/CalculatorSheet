@@ -50,6 +50,7 @@ export class SpreadSheetController {
 
   // users who are locked out of the sheet
   private _lockedSheetUsers: string[] = [];
+  private _lockedSheet: boolean = false;
 
   /**
    * The components that the SpreadSheetEngine uses to manage the sheet
@@ -122,7 +123,7 @@ export class SpreadSheetController {
     userData!.cellLabel = cellLabel;
 
     // if the spreadsheet is locked then we cannot edit
-    if (this._lockedSheetUsers.includes(user)) {
+    if (this._lockedSheet || this._lockedSheetUsers.includes(user)) {
       this._errorMessage = `You do not have edit access to this sheet`;
       return false;
     }
@@ -166,15 +167,14 @@ export class SpreadSheetController {
     // this._contributingUsers.delete(user);
   }
 
-  getProps() {
-    const isUnlocked = this._lockedSheetUsers.length === 0;
+  getProps(): any {
     // add contributing users's key to the result.activeUsers
     const activeUsers: string[] = [];
     this._contributingUsers.forEach((value: ContributingUser, key: string) => {
       activeUsers.push(key);
     });
     return {
-      isUnlocked: isUnlocked,
+      isUnlocked: !this._lockedSheet,
       activeUsers: activeUsers,
     };
   }
@@ -183,6 +183,7 @@ export class SpreadSheetController {
    * lock the users out of the sheet
    */
   lockUsers(users: string[]): void {
+    this._lockedSheet = true;
     users.forEach((user) => {
       // if the user is editing a cell then release the edit
       if (this._contributingUsers.get(user)?.isEditing) {
@@ -208,6 +209,7 @@ export class SpreadSheetController {
    * unlock all users out of the sheet
    * */
   unlockAllUsers(): void {
+    this._lockedSheet = false;
     this._lockedSheetUsers = [];
   }
 

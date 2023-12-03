@@ -1,29 +1,7 @@
 /**
  * the server for the DocumentHolder
  *
- * this is an express server that provides the following routes:
- *
- * GET /documents
- *
- * GET /documents/:name
- *
- * PUT /document/request/cell/:name/:cell
- *
- * PUT /document/release/token/:name/:token
- *
- * PUT /document/add/token/:name/:token
- *
- * PUT /document/add/cell/:name/:cell
- *
- * PUT /document/remove/token/:name
- *
- * PUT /document/clear/formula/:name
- *
- * GET /document/formula/string/:name
- *
- * GET /document/result/string/:name
- *
- * GET /document/editstatus/:name
+ * this is an express server
  */
 
 import express from "express";
@@ -153,6 +131,7 @@ app.put("/user/assign", (req: express.Request, res: express.Response) => {
 /**
  * Document Server
  * GET /documents
+ * GET /documents/props
  * PUT /documents/:name
  * POST /documents/create/:name
  * PUT /document/cell/edit/:name
@@ -426,8 +405,9 @@ app.put(
     // lock all users
     const nonAdminUsers = userController.getNonAdminUsers();
     documentHolder.lockUsers(name, nonAdminUsers);
+    const documentsProps = documentHolder.getDocumentProps();
 
-    res.status(200).send(`Document ${name} locked`);
+    res.status(200).send(documentsProps);
   }
 );
 
@@ -454,8 +434,9 @@ app.put(
     }
     // unlock all users
     documentHolder.unlockAllUsers(name);
+    const documentsProps = documentHolder.getDocumentProps();
 
-    res.status(200).send(`Document ${name} unlocked`);
+    res.status(200).send(documentsProps);
   }
 );
 
@@ -477,7 +458,9 @@ app.put("/document/lockall", (req, res) => {
     documentHolder.lockUsers(document, nonAdminUsers);
   });
 
-  res.status(200).send("All documents locked");
+  const documentsProps = documentHolder.getDocumentProps();
+
+  res.status(200).send(documentsProps);
 });
 
 // unlock all documents
@@ -497,7 +480,9 @@ app.put("/document/unlockall", (req, res) => {
     documentHolder.unlockAllUsers(document);
   });
 
-  res.status(200).send("All documents unlocked");
+  const documentsProps = documentHolder.getDocumentProps();
+
+  res.status(200).send(documentsProps);
 });
 
 /**

@@ -90,6 +90,7 @@ class Database {
    */
   private messages: Message[] = [];
   private messageCount: number = 0;
+  private lockedChat: boolean = false;
   private lockedChatUsers: string[] = [];
   private error: string = "";
   private filePath: string = path.join(
@@ -116,6 +117,7 @@ class Database {
   reset() {
     this.messages = [];
     this.messageCount = 0;
+    this.lockedChat = false;
     this.lockedChatUsers = [];
     this.error = "";
   }
@@ -177,7 +179,7 @@ class Database {
    */
   addMessage(user: string, message: string) {
     // send error if user is locked
-    if (this.lockedChatUsers.includes(user)) {
+    if (this.lockedChat || this.lockedChatUsers.includes(user)) {
       this.error = `${user} does not have permission to send messages`;
       return;
     }
@@ -194,6 +196,7 @@ class Database {
       messages: this.messages,
       paginationToken: "__TEST_DISABLE_IN_PRODUCTION__",
       error: this.error,
+      lockedChat: this.lockedChat,
       lockedChatUsers: this.lockedChatUsers,
     };
 
@@ -211,6 +214,7 @@ class Database {
       messages: [],
       paginationToken: "",
       error: this.error,
+      lockedChat: this.lockedChat,
       lockedChatUsers: this.lockedChatUsers,
     };
     this.error = "";
@@ -284,6 +288,7 @@ class Database {
    * @memberof Database
    */
   lockUser(user: string) {
+    this.lockedChat = true;
     // find if the user is already locked
     const index = this.lockedChatUsers.findIndex((u) => u === user);
     if (index === -1) {
@@ -299,6 +304,7 @@ class Database {
    * @memberof Database
    * */
   lockUsers(users: string[]) {
+    this.lockedChat = true;
     users.forEach((user) => {
       // find if the user is already locked
       const index = this.lockedChatUsers.findIndex((u) => u === user);
@@ -324,6 +330,9 @@ class Database {
       this.lockedChatUsers.splice(index, 1);
       console.log("unlocked user,", user);
     }
+    if (this.lockedChatUsers.length === 0) {
+      this.lockedChat = false;
+    }
   }
 
   /**
@@ -341,6 +350,9 @@ class Database {
         console.log("unlocked user,", user);
       }
     });
+    if (this.lockedChatUsers.length === 0) {
+      this.lockedChat = false;
+    }
   }
 
   /**
@@ -348,6 +360,7 @@ class Database {
    * @memberof Database
    * */
   unlockAllUsers() {
+    this.lockedChat = false;
     this.lockedChatUsers = [];
     console.log("unlocked all users");
   }

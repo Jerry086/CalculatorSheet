@@ -60,6 +60,7 @@ export interface MessagesContainer {
   messages: MessageContainer[];
   paginationToken: string;
   // locked users
+  lockedChat: boolean;
   lockedChatUsers: string[];
   error: string;
 }
