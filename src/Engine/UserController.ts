@@ -7,6 +7,7 @@
  */
 
 import { UserContainer, UsersContainer } from "./GlobalDefinitions";
+import bcrypt from "bcryptjs";
 
 class User implements UserContainer {
   /**
@@ -59,7 +60,6 @@ class UserController {
   private error: string = "";
   private plaintextPassword: string = "teamHu";
   private hashedPassword: string = "";
-  private bcrypt = require("bcrypt");
 
   /**
    * Creates an instance of Database.
@@ -72,7 +72,7 @@ class UserController {
     // hash the password
     const saltRounds: number = 10;
 
-    this.bcrypt.hash(
+    bcrypt.hash(
       this.plaintextPassword,
       saltRounds,
       (err: any, hash: string) => {
@@ -140,27 +140,24 @@ class UserController {
     return nonAdminUsers;
   }
 
-  // promote a user to admin
-  promoteUser(user: string, password: string): boolean {
+  // check if a user is active
+  isActive(user: string): boolean {
     const index = this.users.findIndex((u) => u.user === user);
     if (index === -1) {
-      this.error = "User not found";
       return false;
     }
-    this.bcrypt.compare(
-      password,
-      this.hashedPassword,
-      (err: any, result: any) => {
-        if (!result) {
-          // Passwords don't match
-          this.error = "Password is incorrect";
-          return false;
-        }
-      }
-    );
-    this.users[index].isAdmin = true;
-    //console.log(JSON.stringify(this.users));
     return true;
+  }
+
+  // promote a user to admin
+  promoteUser(user: string): void {
+    const index = this.users.findIndex((u) => u.user === user);
+    this.users[index].isAdmin = true;
+  }
+
+  // get hashed password
+  getHashedPassword(): string {
+    return this.hashedPassword;
   }
 
   // check if a user is an admin

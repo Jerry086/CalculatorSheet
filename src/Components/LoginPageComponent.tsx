@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
-import bcrypt from 'bcryptjs';
 import ChatClient from '../Engine/ChatClient';
 import SpreadSheetClient, { SheetsDataType } from '../Engine/SpreadSheetClient';
 
@@ -101,42 +100,67 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
         }} />
     </div>
   }
-  // Function to register a user (replace with actual backend implementation)
-  async function registerUser(userName: string): Promise<boolean> {
-    // Simulate a backend request (replace with actual fetch or axios call)
-    //const chatClientInstance = new ChatClient();
-    //const baseUrl = chatClientInstance.getBaseURL();
-    const response = await fetch(`${baseUrl}/user/${userName}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userName: userName }),
-    });
-    const responseText = await response.text();
-    if (response.status === 200) {
-      return true;
-    } else {
-      return false;
-      //return { error: "Backend error: " + responseText };
+
+  // Function to register a user 
+  async function registerUser(userName: string) {
+    try {
+      const response = await fetch(`${baseUrl}/user/${userName}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userName: userName }),
+      });
+      if(!response.ok) {
+        throw new Error("Error registering user");
+      }
+    } 
+    catch (error) {
+      alert(error);
     }
   }
 
-  //updated login funtion - for admin name request login info
+  // Function to initiate the login process
+  async function loginCall(userName: string): Promise<LoginResponse | LoginError> {
+    if(userName !== "Admin" && userName !== "admin") {
+      // Return response for non-admin user
+      return { username: userName, isAdmin: false};
+    }
+    const password = prompt("Please enter your password");
+    if(password === null || password === "") {
+      // Return an error for blank password
+      return { error: "Password cannot be blank" };
+    }
+  
+    try {
+      // Send password to backend to check if correct
+      const isPasswordCorrect = await backendCheckPassword(userName, password);
+
+      if (isPasswordCorrect) {
+        return { username: userName, isAdmin: true };
+      } else {
+        // Return an error for wrong password
+        return { error: "Wrong password" };
+      }
+    } catch (error) {
+      // Handle any errors that occurred during the backend calls
+      return { error: "Backend error: " + (error instanceof Error ? error.message : "Unknown error") };
+    }
+  }
+
+  //updated login function - for admin name request login info
   // need to write back end and way to set admin names todo
   async function handleLogin() {
     const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
-  
-    if (checkUserNameInput()) { //is username not blank
-      const userName = userNameInput.value;
-      if (!checkUserName(userName)) { // if username matches regex 
-        return;
-      }
-
-      try {
+    const userName = userNameInput.value;
+    // username is blank or invalid
+    if(!checkUserName(userName)) {  
+      return;
+    }
+   
+    try {
       // first register user, the promote Admin user.
-      const registerUserResponse = await registerUser(userName);
-      //const loginResponse = dummyLoginCall(userName);
+      await registerUser(userName);
       const loginResponse = await loginCall(userName);
     
     // TODO
@@ -166,108 +190,30 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
         // Handle any errors that occurred during the backend calls
         return { error: "Login error: " + (error instanceof Error ? error.message : "Unknown error") };
       }
-  
-      
-    }
   }
 
 
-// Function to check if the password is correct (replace with actual backend implementation)
-async function backendCheckPassword(userName: string, encryptedPassword: string): Promise<boolean> {
-  // Simulate a backend request (replace with actual fetch or axios call)
-  //const chatClientInstance = new ChatClient();
-  //const baseUrl = chatClientInstance.getBaseURL();
+// Function to check if the password is correct
+async function backendCheckPassword(userName: string, password: string): Promise<boolean> {
   const response = await fetch(`${baseUrl}/user/promote`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ userName: userName, password: encryptedPassword }),
+    body: JSON.stringify({ userName: userName, password: password }),
   });
-  //console.log(encryptedPassword);
-
-  // Assuming the backend returns a JSON object with a 'isPasswordCorrect' property
-  //const result = await response.json();
-  
-  const responseText = await response.text();
-  //console.log(responseText);
-  //const contentType = response.headers.get('Content-Type');
-  //console.log(contentType);
-  // if the response is 200 then the password is correct
-  // if the response is error then the password is incorrect
-  if (response.status === 200) {
-    return true;
-  } else {
-    return false;
-  }
+  return response.ok;
 }
 
-async function hashPassword(password: string) {
-  const saltRounds = 10;
-
-  try {
-    const hash = await bcrypt.hash(password, saltRounds);
-    //console.log('Hash to store:', hash);
-    return hash;
-  } catch (error) {
-    //console.error(error);
-    throw error;
-  }
-}
-
-// Function to initiate the login process
-async function loginCall(userName: string): Promise<LoginResponse | LoginError> {
-  if(userName !== "Admin" && userName !== "admin") {
-    // Return response for non-admin user
-    return { username: userName, isAdmin: false};
-  }
-  const password = prompt("Please enter your password");
-  if(password === null || password === "") {
-    // Return an error for blank password
-    return { error: "Password cannot be blank" };
-  }
-  const encryptedPassword = await hashPassword(password)
-
-  try {
-    // Send encrypted password to backend to check if correct
-    const isPasswordCorrect = await backendCheckPassword(userName, encryptedPassword);
-
-    if (isPasswordCorrect) {
-      return { username: userName, isAdmin: true };
-    } else {
-      // Return an error for wrong password
-      return { error: "Wrong password" };
-    }
-  } catch (error) {
-    // Handle any errors that occurred during the backend calls
-    return { error: "Backend error: " + (error instanceof Error ? error.message : "Unknown error") };
-  }
-}
-
-
-  // old function for checking username
+  // checking if username is valid
   function checkUserName(userName: string): boolean {
-    /*
     if (userName === "") {
       alert("Please enter a user name");
       return false;
     }
-    */
     // user name should only contain letters and numbers and be at most 12 characters long
     if (!userName.match(/^[a-zA-Z0-9]{1,12}$/)) {
       alert("User name can only contain letters and numbers and be at most 12 characters long.");
-      return false;
-    }
-    return true;
-  }
-
-  // old function for checking username
-  function checkUserNameInput(): boolean {
-    const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
-    const userName = userNameInput.value;
-
-    if (userName === "") {
-      alert("Please enter a user name");
       return false;
     }
     return true;

@@ -7,6 +7,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import bcrypt from "bcrypt";
 import { DocumentHolder } from "../Engine/DocumentHolder";
 import { PortsGlobal } from "../ServerDataDefinitions";
 import { Database } from "../Engine/Database";
@@ -91,21 +92,33 @@ app.put("/user/promote", (req: express.Request, res: express.Response) => {
     return;
   }
 
+  const isActive = userController.isActive(userName);
+  if (!isActive) {
+    res.status(400).send("User is not active");
+    return;
+  }
+
   console.log(`promote ${userName} with password ${password}`);
 
-  const result = userController.promoteUser(userName, password);
-  // unlock the admin if it was locked
-  if (result) {
-    database.unlockUser(userName);
-    const documentNames = documentHolder.getDocumentNames();
-    documentNames.forEach((documentName) => {
-      documentHolder.unlockUser(documentName, userName);
-    });
-  }
-  const users = userController.getAllUsers();
-  //console.log(JSON.stringify(users));
-  //res.status(200).send(users);
-  res.status(200).json(users);
+  bcrypt.compare(
+    password,
+    userController.getHashedPassword(),
+    (err: any, result: any) => {
+      console.log("result:", result);
+      if (!result) {
+        // Passwords don't match
+        res.status(400).send("Authentication Failed");
+      } else {
+        userController.promoteUser(userName);
+        database.unlockUser(userName);
+        const documentNames = documentHolder.getDocumentNames();
+        documentNames.forEach((documentName) => {
+          documentHolder.unlockUser(documentName, userName);
+        });
+        res.json({ success: true, message: "Authentication Successful" });
+      }
+    }
+  );
 });
 
 // assign a user to a group
