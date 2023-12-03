@@ -18,7 +18,8 @@ function App() {
 
 
   const [documentName, setDocumentName] = useState(getDocumentNameFromWindow());
-  const spreadSheetClient = new SpreadSheetClient('documents', '', displayErrorMessage);
+  const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || '');
+  const spreadSheetClient = new SpreadSheetClient('documents', userName, displayErrorMessage);
   const chatClient = new ChatClient();
   //const memoryUsage = process.memoryUsage();
   useEffect(() => {
@@ -26,7 +27,6 @@ function App() {
       setDocumentName(getDocumentNameFromWindow());
     }
   }, [getDocumentNameFromWindow]);
-
 
 
   // for the purposes of this demo and for the final project
@@ -70,7 +70,8 @@ function App() {
   }
 
   // If there is no document name point this thing at /document
-  if (documentName === '') {
+  // If there is no userName and has a document
+  if (documentName === '' || (!userName && documentName !== 'documents')) {
     setDocumentName('documents');
     resetURL('documents');
   }

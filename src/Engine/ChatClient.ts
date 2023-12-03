@@ -63,7 +63,6 @@ class ChatClient {
 
     if (this.messages.length === 0) {
       this.messages.push(message);
-      console.log(`inserted message ${messageID} into empty array`);
       return;
     }
 
@@ -78,7 +77,6 @@ class ChatClient {
 
     if (messageID < this.messages[this.messages.length - 1].id) {
       this.messages.push(message);
-      console.log(`inserted message ${messageID} at the end of the array`);
       this.previousMessagesFetched = true;
 
       return;
