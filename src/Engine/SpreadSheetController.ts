@@ -123,7 +123,7 @@ export class SpreadSheetController {
     userData!.cellLabel = cellLabel;
 
     // if the spreadsheet is locked then we cannot edit
-    if (this._lockedSheet || this._lockedSheetUsers.includes(user)) {
+    if (this._lockedSheetUsers.includes(user)) {
       this._errorMessage = `You do not have edit access to this sheet`;
       return false;
     }
