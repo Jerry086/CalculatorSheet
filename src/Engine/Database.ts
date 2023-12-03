@@ -179,7 +179,7 @@ class Database {
    */
   addMessage(user: string, message: string) {
     // send error if user is locked
-    if (this.lockedChat || this.lockedChatUsers.includes(user)) {
+    if (this.lockedChatUsers.includes(user)) {
       this.error = `${user} does not have permission to send messages`;
       return;
     }

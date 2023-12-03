@@ -46,6 +46,10 @@ class ChatClient {
     this.updateDisplay = callback;
   }
 
+  getMessengerLockStatus(): boolean {
+    return this.chatLocked;
+  }
+
   /**
    * insert a message into the array of messages
    * @param message a message to insert into the array of messages
