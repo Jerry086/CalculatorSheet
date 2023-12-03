@@ -34,7 +34,6 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   const [selectedDocument, setSelectedDocument] = useState<string[]>([]);
 
   const baseUrl = spreadSheetClient.getBaseURL();
-
   // SpreadSheetClient is fetching the documents from the server so we should
   // check every 1/10 of a second to see if the documents have been updated
   useEffect(() => {
@@ -59,62 +58,17 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
 
 
   async function handleLockSheets() {
-    for(let i = 0; i < selectedDocument.length; i++) {
-      const documentName = selectedDocument[i];
+    selectedDocument.forEach((documentName) => {
       // send request to backend to lock sheet
-      try {
-        const response = await fetch(`${baseUrl}/document/lock/${documentName}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ admin: userName }),
-        });
-  
-        if (response.ok) {
-          const newSheetsData = { ...sheetsData };
-          newSheetsData[documentName].isUnlocked = false;
-          setSheetsData((newSheetsData) => {
-            console.log("%s locked", documentName, newSheetsData[documentName].isUnlocked.toString());
-            return newSheetsData;
-          });
-        } else {
-          throw new Error(`Error locking sheets: ${response.status}`);
-        }
-      } catch (error) {
-        // Handle any errors that occurred during the backend calls
-        alert(error);
-        return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
-      }
-    }
+      spreadSheetClient.lockDocument(documentName, userName);
+    });
   }
 
   async function handleUnlockSheets() {
-    for(let i = 0; i < selectedDocument.length; i++) {
-      const documentName = selectedDocument[i];
-          // send request to backend to unlock sheet
-      try {
-        const response = await fetch(`${baseUrl}/document/unlock/${documentName}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ admin: userName }),
-        });
-  
-        if (response.ok) {
-          const newSheetsData = { ...sheetsData };
-          newSheetsData[documentName].isUnlocked = true;
-          setSheetsData(newSheetsData);
-          console.log("%s unlocked", documentName);
-        } else {
-          throw new Error(`Error locking sheets: ${response.status}`);
-        }
-      } catch (error) {
-        // Handle any errors that occurred during the backend calls
-        return { error: "Lock sheets error: " + (error instanceof Error ? error.message : "Unknown error") };
-      }
-    } 
+    selectedDocument.forEach((documentName) => {
+      // send request to backend to unlock sheet
+      spreadSheetClient.unlockDocument(documentName, userName);
+    });
   }
 
 

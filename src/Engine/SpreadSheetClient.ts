@@ -402,16 +402,44 @@ class SpreadSheetClient {
       });
   }
 
-  private _getEditorString(
-    contributingUsers: UserEditing[],
-    cellLabel: string
-  ): string {
-    for (let user of contributingUsers) {
-      if (user.cell === cellLabel) {
-        return user.user;
-      }
-    }
-    return "";
+  public lockDocument(documentName: string, userName: string) {
+    const fetchURL = `${this._baseURL}/document/lock/${documentName}`;
+    fetch(fetchURL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ admin: userName }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((documentsProp) => {
+        this._updateDocumentsPros(documentsProp);
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  }
+
+  public unlockDocument(documentName: string, userName: string) {
+    const fetchURL = `${this._baseURL}/document/unlock/${documentName}`;
+    fetch(fetchURL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ admin: userName }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((documentsProp) => {
+        this._updateDocumentsPros(documentsProp);
+      })
+      .catch((error) => {
+        alert(error);
+      });
   }
 
   private _updateDocumentsPros(documentsProp: any[]): void {
@@ -470,6 +498,18 @@ class SpreadSheetClient {
     if (errorMessage !== "") {
       this._errorCallback(errorMessage);
     }
+  }
+
+  private _getEditorString(
+    contributingUsers: UserEditing[],
+    cellLabel: string
+  ): string {
+    for (let user of contributingUsers) {
+      if (user.cell === cellLabel) {
+        return user.user;
+      }
+    }
+    return "";
   }
 
   /**
