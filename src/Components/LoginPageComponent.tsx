@@ -3,7 +3,7 @@ import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
 import bcrypt from 'bcryptjs';
 import ChatClient from '../Engine/ChatClient';
-import SpreadSheetClient from '../Engine/SpreadSheetClient';
+import SpreadSheetClient, { SheetsDataType } from '../Engine/SpreadSheetClient';
 
 /**
  * Login PageComponent is the component that will be used to display the login page
@@ -26,15 +26,6 @@ interface LoginError {
   error: string;
 }
 
-interface SheetData {
-  isUnlocked: boolean;
-  activeUsers: string[];
-}
-
-interface SheetsDataType {
-  [key: string]: SheetData;
-}
-
 function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps): JSX.Element {
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
   const [isAdmin, setIsAdmin] = useState(window.sessionStorage.getItem('isAdmin') === 'true');
@@ -49,11 +40,7 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   useEffect(() => {
     const interval = setInterval(() => {
       let data = spreadSheetClient.getSheetsProps();
-      const newSheetsData: SheetsDataType = {};
-      data.forEach((sheet) => {
-        newSheetsData[sheet.documentName] = { isUnlocked: sheet.isUnlocked, activeUsers: sheet.activeUsers };
-      })
-      setSheetsData(newSheetsData);
+      setSheetsData(data);
     }, 100);
     return () => clearInterval(interval);
   });
@@ -478,8 +465,7 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
         access the documents!
       </div>;
     }
-
-    const sheets: string[] = spreadSheetClient.getSheets();
+    const sheets: string[] = Object.keys(sheetsData);
     // make a table with the list of sheets and a button beside each one to edit the sheet
     return <div>
       <h1>Student View</h1>

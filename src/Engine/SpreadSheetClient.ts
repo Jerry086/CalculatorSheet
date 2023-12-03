@@ -22,7 +22,15 @@ import {
   LOCAL_SERVER_URL,
   RENDER_SERVER_URL,
 } from "../ServerDataDefinitions";
-import e from "express";
+
+export interface SheetData {
+  isUnlocked: boolean;
+  activeUsers: string[];
+}
+
+export interface SheetsDataType {
+  [key: string]: SheetData;
+}
 
 class SpreadSheetClient {
   // get the environment variable SERVER_LOCAL
@@ -35,8 +43,7 @@ class SpreadSheetClient {
   private _documentName: string = "";
   private _document: DocumentTransport;
   private _server: string = "";
-  private _documentList: string[] = [];
-  private _documentProps: any[] = [];
+  private _documentsProps: SheetsDataType = {};
   private _errorCallback: (error: string) => void = () => {};
 
   constructor(
@@ -61,8 +68,7 @@ class SpreadSheetClient {
     this._errorCallback = errorCallback;
 
     console.log(`process.env = ${JSON.stringify(process.env)}`);
-    this.getDocuments(this._userName);
-    this.getDocumentPros();
+    this.getDocumentsPros();
   }
 
   private _initializeBlankDocument(): DocumentTransport {
@@ -97,28 +103,15 @@ class SpreadSheetClient {
    *
    * Every .1 seconds, fetch the document from the server
    * call this.getDocument(name, user) to get the document
-   * and this.getDocuments(user) to get the list of documents
+   * and this.getDocumentProps to get the list of documents
    */
 
   private async _timedFetch(): Promise<Response> {
-    // console.log('timedFetch ran again Outer');
-    let documentFetchCount = 0;
-    const documentListInterval = 20;
-    // only get the document list every 0.5 seconds
-    return new Promise((resolve, reject) => {
+    // only get the document list every 0.1 seconds
+    return new Promise((res, rej) => {
       setTimeout(() => {
-        // console.log('timedFetch ran again middle');
         this.getDocument(this._documentName, this._userName);
-        documentFetchCount++;
-        if ( true || documentFetchCount > documentListInterval) {
-          // TODO THIS IF CHECK NEEDS FIXING
-          documentFetchCount = 0;
-          this.getDocuments(this._userName);
-          this.getDocumentPros();
-        console.log('timedFetch ran again inner');
-
-          console.log(this._documentProps);
-        }
+        this.getDocumentsPros();
         this._timedFetch();
       }, 100);
     });
@@ -173,12 +166,8 @@ class SpreadSheetClient {
     }
   }
 
-  getSheets(): string[] {
-    return this._documentList;
-  }
-
-  getSheetsProps(): any[] {
-    return this._documentProps;
+  getSheetsProps(): SheetsDataType {
+    return this._documentsProps;
   }
 
   // Interim solution for pushing the editing data through to the GUI
@@ -400,32 +389,16 @@ class SpreadSheetClient {
 
   /**
    * get the document list from the server
-   *
-   * @param user the user name
-   *
    * this is client side so we use fetch
    */
-  public getDocuments(user: string) {
-    // put the user name in the body
-    const userName = user;
-    const fetchURL = `${this._baseURL}/documents/`;
-    fetch(fetchURL)
-      .then((response) => {
-        return response.json() as Promise<string[]>;
-      })
-      .then((documents: string[]) => {
-        this._updateDocumentList(documents);
-      });
-  }
-
-  public getDocumentPros() {
+  public getDocumentsPros() {
     const fetchURL = `${this._baseURL}/documents/props`;
     fetch(fetchURL)
       .then((response) => {
         return response.json() as Promise<any[]>;
       })
       .then((documentsProp: any[]) => {
-        this._updateDocumentPros(documentsProp);
+        this._updateDocumentsPros(documentsProp);
       });
   }
 
@@ -441,12 +414,15 @@ class SpreadSheetClient {
     return "";
   }
 
-  private _updateDocumentList(documents: string[]): void {
-    this._documentList = documents;
-  }
-
-  private _updateDocumentPros(documentsProp: any[]): void {
-    this._documentProps = documentsProp;
+  private _updateDocumentsPros(documentsProp: any[]): void {
+    const newSheetsData: SheetsDataType = {};
+    documentsProp.forEach((sheet) => {
+      newSheetsData[sheet.documentName] = {
+        isUnlocked: sheet.isUnlocked,
+        activeUsers: sheet.activeUsers,
+      };
+    });
+    this._documentsProps = newSheetsData;
   }
 
   private _updateDocument(document: DocumentTransport): void {
