@@ -89,12 +89,6 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
         defaultValue={userName}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
-            // get the text from the input
-            // let userName = (event.target as HTMLInputElement).value;
-            // window.sessionStorage.setItem('userName', userName);
-            // // set the user name
-            // setUserName(userName);
-            // spreadSheetClient.userName = userName;
             handleLogin();
           }
         }} />
@@ -149,7 +143,6 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
   }
 
   //updated login function - for admin name request login info
-  // need to write back end and way to set admin names todo
   async function handleLogin() {
     const userNameInput = document.querySelector('#userNameInput') as HTMLInputElement;
     const userName = userNameInput.value;
@@ -157,53 +150,33 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
     if(!checkUserName(userName)) {  
       return;
     }
-   
-    try {
-      // first register user, the promote Admin user.
-      await registerUser(userName);
-      const loginResponse = await loginCall(userName);
-    
-    // TODO
+    // first register user, the promote Admin user.
+    await registerUser(userName);
+    const loginResponse = await loginCall(userName);
 
-      if ('error' in loginResponse) {
-        alert(loginResponse.error);
-        return;
-      }
-  
-      window.sessionStorage.setItem('userName', loginResponse.username);
-      window.sessionStorage.setItem('isAdmin', loginResponse.isAdmin.toString());
-      /*
-      if (loginResponse.isAdmin && loginResponse.isAdminKey) {
-        window.sessionStorage.setItem('isAdminKey', loginResponse.isAdminKey!);
-      }
-      */
-  
-      setUserName(loginResponse.username);
-      setIsAdmin(loginResponse.isAdmin);
-      /*
-      if (loginResponse.isAdminKey) {
-        setIsAdminKey(loginResponse.isAdminKey);
-      }
-      */
-      spreadSheetClient.userName = loginResponse.username;
-      } catch (error) {
-        // Handle any errors that occurred during the backend calls
-        return { error: "Login error: " + (error instanceof Error ? error.message : "Unknown error") };
-      }
+    if ('error' in loginResponse) {
+      alert(loginResponse.error);
+      return;
+    }
+    window.sessionStorage.setItem('userName', loginResponse.username);
+    window.sessionStorage.setItem('isAdmin', loginResponse.isAdmin.toString());  
+    setUserName(loginResponse.username);
+    setIsAdmin(loginResponse.isAdmin);
+    spreadSheetClient.userName = loginResponse.username;
   }
 
 
-// Function to check if the password is correct
-async function backendCheckPassword(userName: string, password: string): Promise<boolean> {
-  const response = await fetch(`${baseUrl}/user/promote`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ userName: userName, password: password }),
-  });
-  return response.ok;
-}
+  // Function to check if the password is correct
+  async function backendCheckPassword(userName: string, password: string): Promise<boolean> {
+    const response = await fetch(`${baseUrl}/user/promote`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userName: userName, password: password }),
+    });
+    return response.ok;
+  }
 
   // checking if username is valid
   function checkUserName(userName: string): boolean {
@@ -224,7 +197,6 @@ async function backendCheckPassword(userName: string, password: string): Promise
     // set the document name
     spreadSheetClient.documentName = documentName;
     // reload the page
-
     // the href needs to be updated.   Remove /documnents from the end of the URL
     const href = window.location.href;
     const index = href.lastIndexOf('/');
@@ -232,16 +204,13 @@ async function backendCheckPassword(userName: string, password: string): Promise
     newURL = newURL + "/" + documentName
     window.history.pushState({}, '', newURL);
     window.location.reload();
-
   }
 
 // updated to account for new state vars
   function logout() {
     // clear the user name
-    // window.sessionStorage.setItem('userName', "");
     window.sessionStorage.removeItem('userName');
     window.sessionStorage.removeItem('isAdmin');
-    window.sessionStorage.removeItem('isAdminKey');
     // reload the page
     window.location.reload();
   }
@@ -251,20 +220,18 @@ async function backendCheckPassword(userName: string, password: string): Promise
   
     return (
       <div>
-        <h1>Teacher View</h1>
+        <h1>Teacher: {userName}</h1>
         {buildToolbar()}
         <table>
           <thead>
             <tr className="selector-title">
               <th>Document Name</th> 
               <th>Lock Status</th>
-              
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {Object.keys(sheetsData).map(sheetName => {
-              // if(sheetName.indexOf("test1") == -1){sheetsData[sheetName].isUnlocked = false;}
               const sheet = sheetsData[sheetName];
               return (
                 <tr className="selector-item">
@@ -273,11 +240,6 @@ async function backendCheckPassword(userName: string, password: string): Promise
                     <input
                       type="checkbox"
                       onChange={(e) => {
-                        // setSheetsData({
-                        //   ...sheetsData,
-                        //   [sheetName]: { ...sheet, isUnlocked: !sheet.isUnlocked }
-                        // });
-                        // e.target.style.borderColor = 'red'; // indicate unsaved change
                         const newSelectedDocument = [...selectedDocument];
                         const index = newSelectedDocument.indexOf(sheetName);
                         if (index === -1) {
@@ -299,7 +261,6 @@ async function backendCheckPassword(userName: string, password: string): Promise
             })}
           </tbody>
         </table>
-        {/* <button onClick={handleSubmitDummy}>Submit</button> */}
       </div>
     );
   }
@@ -316,24 +277,21 @@ async function backendCheckPassword(userName: string, password: string): Promise
     const sheets: string[] = Object.keys(sheetsData);
     // make a table with the list of sheets and a button beside each one to edit the sheet
     return <div>
-      <h1>Student View</h1>
+      <h1>Student: {userName}</h1>
       <table>
         <thead>
           <tr className="selector-title">
             <th>Document Name---</th>
             <th>Actions</th>
-
           </tr>
         </thead>
         <tbody>
           {sheets.map((sheet) => {
-              //if(sheetsData && sheet.indexOf("test1") == -1 && sheetsData[sheet]){sheetsData[sheet].isUnlocked = false;} // todo dummy data
-             const sheet1 = sheetsData[sheet]; 
+            const sheet1 = sheetsData[sheet]; 
             return <tr className="selector-item">
-              <td  >{sheet}    <span>{sheet1 && !sheet1.isUnlocked && "🔒"  }</span></td>
+              <td >{sheet} <span>{sheet1 && !sheet1.isUnlocked && "🔒"  }</span></td>
               <td><button onClick={() => loadDocument(sheet)}>
-                 {/* // todo disable button? */}
-                Edit
+                Open
               </button></td>
             </tr>
           })}
@@ -354,13 +312,7 @@ async function backendCheckPassword(userName: string, password: string): Promise
 
   function loginPage() {
 
-    //console.log("username & isadmin are ");
-    //userName && console.log(userName);
-    //isAdmin && console.log(isAdmin);
-
     return <table>
-
-
       <tbody>
         <tr>
           <td>
@@ -372,12 +324,8 @@ async function backendCheckPassword(userName: string, password: string): Promise
         </tr>
       </tbody>
     </table>
-
-
   }
-
-
-
+  
   return (
     <div className="LoginPageComponent">
       {loginPage()}
