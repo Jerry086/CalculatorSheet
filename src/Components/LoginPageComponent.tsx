@@ -3,8 +3,7 @@ import './LoginPageComponent.css';
 import './loginPageOnlyCSS.css';
 import bcrypt from 'bcryptjs';
 import ChatClient from '../Engine/ChatClient';
-import { UsersContainer } from '../Engine/GlobalDefinitions';
-
+import SpreadSheetClient from '../Engine/SpreadSheetClient';
 
 /**
  * Login PageComponent is the component that will be used to display the login page
@@ -12,11 +11,7 @@ import { UsersContainer } from '../Engine/GlobalDefinitions';
  * that the user has access to.  Each document will have a button that will allow the
  * user to edit the document. when the user clicks on the button, the user will be
  * taken to the document page.
- * @returns 
  */
-
-import SpreadSheetClient from '../Engine/SpreadSheetClient';
-import { spread } from 'axios';
 
 interface LoginPageProps {
   spreadSheetClient: SpreadSheetClient;
@@ -25,7 +20,6 @@ interface LoginPageProps {
 interface LoginResponse {
   username: string;
   isAdmin: boolean;
-  isAdminKey?: string;
 }
 
 interface LoginError {
@@ -41,48 +35,30 @@ interface SheetsDataType {
   [key: string]: SheetData;
 }
 
-// const chatClientInstance = new ChatClient();
-// const baseUrl = chatClientInstance.getBaseURL();
-
 function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps): JSX.Element {
   const [userName, setUserName] = useState(window.sessionStorage.getItem('userName') || "");
   const [isAdmin, setIsAdmin] = useState(window.sessionStorage.getItem('isAdmin') === 'true');
-  const [isAdminKey, setIsAdminKey] = useState(window.sessionStorage.getItem('isAdminKey') || "");
-  const [documents, setDocuments] = useState<string[]>([]);
   const [sheetsData, setSheetsData] = useState<SheetsDataType>({});
-  const [usersContainer, setusersContainer] = useState<UsersContainer>();
   const [isChatLocked, setIsChatLocked] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<string[]>([]);
 
   const baseUrl = spreadSheetClient.getBaseURL();
 
   // SpreadSheetClient is fetching the documents from the server so we should
-  // check every 1/20 of a second to see if the documents have been fetched
+  // check every 1/10 of a second to see if the documents have been updated
   useEffect(() => {
     const interval = setInterval(() => {
-      
-      // const sheets = spreadSheetClient.getSheets();
-      // console.log("before getSheetsProps");
-
       let data = spreadSheetClient.getSheetsProps();
-      // console.log("data from backend is ", data[0].documentName, "is", data[0].isUnlocked)
       const newSheetsData: SheetsDataType = {};
       data.forEach((sheet) => {
         newSheetsData[sheet.documentName] = { isUnlocked: sheet.isUnlocked, activeUsers: sheet.activeUsers };
       })
-      
       setSheetsData(newSheetsData);
-      // console.log("after setSheetsData");
-      
-      console.log(JSON.stringify(newSheetsData["test1"]));
-      // if (sheets.length > 0) {
-      //   setDocuments(sheets);
-      // }
     }, 100);
     return () => clearInterval(interval);
   });
 
-  // creates toolbar for admin users -TODO
+  // creates toolbar for admin users
   function buildToolbar() {
     return (
       <div className="toolbar">
@@ -236,37 +212,6 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
     </div>
 
   }
-
-  // Fuction to get all active users
-  async function getActiveUsers() {
-    try {
-      // Simulate a backend request (replace with actual fetch or axios call)
-      //const chatClientInstance = new ChatClient();
-      //const baseUrl = chatClientInstance.getBaseURL();
-      const response = await fetch(`${baseUrl}/user`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const usersContainer: UsersContainer = await response.json();
-        setusersContainer(usersContainer);
-        console.log(JSON.stringify(usersContainer));
-        return usersContainer;
-        // return true;
-      } else {
-        throw new Error(`Error fetching users: ${response.status}`);
-      }
-    } catch (error) {
-      console.error(error);
-      throw new Error("Error fetching users");
-    }
-  }
-      
-
-
   // Function to register a user (replace with actual backend implementation)
   async function registerUser(userName: string): Promise<boolean> {
     // Simulate a backend request (replace with actual fetch or axios call)
@@ -336,34 +281,6 @@ function  LoginPageComponent({ spreadSheetClient, chatClient }: LoginPageProps):
       
     }
   }
-  
-
-  
-  //updated login funtion handler - for admin name request login info
-  // need to write back end and way to set admin names todo
-  function dummyLoginCall(userName: string): LoginResponse | LoginError {
-    if (userName === "Admin") { // call to server, check if admin user
-      const password = prompt("Please enter your password");
-      // check if password is not blank
-      if (password != null) {
-        console.log("password is " + password);
-        // encrypt password using SHA256
-
-        // send password to backend to check if correct
-
-        // get if correct info from backend
-
-      }
-
-      if (password === "password") { // call to server to authenticate - encrypt this
-        return { username: "Admin", isAdmin: true, isAdminKey: "secretKey" }; // secretKey should be encrypted token
-      } else {
-        return { error: "Wrong password" };
-      }
-    } else {
-      return { username: userName, isAdmin: false };
-    }
-  }
 
 
 // Function to check if the password is correct (replace with actual backend implementation)
@@ -411,35 +328,30 @@ async function hashPassword(password: string) {
 
 // Function to initiate the login process
 async function loginCall(userName: string): Promise<LoginResponse | LoginError> {
-  if (userName === "Admin") {
-    const password = prompt("Please enter your password");
-
-    if (password != null && password !== "") {
-      //console.log("password is " + password);
-
-        const encryptedPassword = await hashPassword(password)
-
-        try {
-          // Send encrypted password to backend to check if correct
-          const isPasswordCorrect = await backendCheckPassword(userName, encryptedPassword);
-
-          if (isPasswordCorrect) {
-            return { username: userName, isAdmin: true };
-          } else {
-            // Return an error for wrong password
-            return { error: "Wrong password" };
-          }
-        } catch (error) {
-          // Handle any errors that occurred during the backend calls
-          return { error: "Backend error: " + (error instanceof Error ? error.message : "Unknown error") };
-              }
-    } else {
-      // Return an error for blank password
-      return { error: "Password cannot be blank" };
-    }
-  } else {
+  if(userName !== "Admin" && userName !== "admin") {
     // Return response for non-admin user
     return { username: userName, isAdmin: false};
+  }
+  const password = prompt("Please enter your password");
+  if(password === null || password === "") {
+    // Return an error for blank password
+    return { error: "Password cannot be blank" };
+  }
+  const encryptedPassword = await hashPassword(password)
+
+  try {
+    // Send encrypted password to backend to check if correct
+    const isPasswordCorrect = await backendCheckPassword(userName, encryptedPassword);
+
+    if (isPasswordCorrect) {
+      return { username: userName, isAdmin: true };
+    } else {
+      // Return an error for wrong password
+      return { error: "Wrong password" };
+    }
+  } catch (error) {
+    // Handle any errors that occurred during the backend calls
+    return { error: "Backend error: " + (error instanceof Error ? error.message : "Unknown error") };
   }
 }
 
@@ -501,13 +413,6 @@ async function loginCall(userName: string): Promise<LoginResponse | LoginError> 
 
  // new admin view
   function buildFileSelectorAdmin(sheetsData: SheetsDataType, setSheetsData: React.Dispatch<React.SetStateAction<SheetsDataType>>) {
-    const sheets = spreadSheetClient.getSheets();
-  
-    function handleSubmitDummy() {
-      Object.keys(sheetsData).forEach(sheetName => {
-        dummyToggleLockStatus(sheetName, sheetsData[sheetName].isUnlocked, isAdminKey);
-      });
-    }
   
     return (
       <div>

@@ -8,6 +8,7 @@ import SpreadSheet from './Components/SpreadSheet';
 import SpreadSheetClient from './Engine/SpreadSheetClient';
 import LoginPageComponent from './Components/LoginPageComponent';
 import ChatClient from './Engine/ChatClient';
+import { spread } from 'axios';
 
 function displayErrorMessage(message: string) {
   alert(message);
