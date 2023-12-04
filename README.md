@@ -1,6 +1,6 @@
 # CS5500 - Chat Features - Team Hu
 
-This project was deployed on Render. You can find the deployed project at [https://calsheet-hu-client.onrender.com/](https://calsheet-hu-client.onrender.com/).
+This project was deployed on Render. You can find the deployed project at [https://calsheethu.onrender.com/](https://calsheethu.onrender.com/).
 
 Note: the frontend server and backend server spins down after inactivity. It's normal to see the client homepage is not responding or the document list is empty when you first visit the site in a while. Please allow a couple of minutes for the servers to spin up before using the app.
 
